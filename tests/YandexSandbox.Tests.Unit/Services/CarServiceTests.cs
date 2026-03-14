@@ -4,6 +4,7 @@ using Moq;
 using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
+using YandexSandbox.Bll.Messaging;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Interfaces;
@@ -14,13 +15,15 @@ namespace YandexSandbox.Tests.Unit.Services;
 public class CarServiceTests
 {
     private readonly Mock<ICarRepository> _repositoryMock;
+    private readonly Mock<IMessageProducer> _messageProducerMock;
     private readonly CarService _sut;
 
     public CarServiceTests()
     {
         _repositoryMock = new Mock<ICarRepository>();
+        _messageProducerMock = new Mock<IMessageProducer>();
         var settings = Options.Create(new CarValidationSettings());
-        _sut = new CarService(_repositoryMock.Object, settings);
+        _sut = new CarService(_repositoryMock.Object, _messageProducerMock.Object, settings);
     }
 
     [Fact]
@@ -99,6 +102,9 @@ public class CarServiceTests
         result.Car.Model.Should().Be("X5");
         result.Car.Year.Should().Be(2024);
         _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<CarEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+        _messageProducerMock.Verify(p => p.ProduceAsync(
+            It.Is<CarCreatedMessage>(m => m.Id == 1 && m.Make == "BMW" && m.Model == "X5"),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Theory]
@@ -122,7 +128,7 @@ public class CarServiceTests
     public async Task CreateAsync_WithCustomMinYear_UsesConfiguredValue()
     {
         var settings = Options.Create(new CarValidationSettings { MinYear = 2000 });
-        var sut = new CarService(_repositoryMock.Object, settings);
+        var sut = new CarService(_repositoryMock.Object, _messageProducerMock.Object, settings);
         var command = new CreateCarCommand
         {
             Make = "Ford", Model = "T", Year = 1950, Color = "Black"

@@ -4,6 +4,7 @@ using YandexSandbox.Bll.CommonModels;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces;
+using YandexSandbox.Bll.Messaging;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Dal.Interfaces;
 using YandexSandbox.Dal.Entities;
@@ -13,11 +14,16 @@ namespace YandexSandbox.Bll.Services;
 public class CarService : ICarService
 {
     private readonly ICarRepository _repository;
+    private readonly IMessageProducer _messageProducer;
     private readonly CarValidationSettings _settings;
 
-    public CarService(ICarRepository repository, IOptions<CarValidationSettings> settings)
+    public CarService(
+        ICarRepository repository,
+        IMessageProducer messageProducer,
+        IOptions<CarValidationSettings> settings)
     {
         _repository = repository;
+        _messageProducer = messageProducer;
         _settings = settings.Value;
     }
 
@@ -53,6 +59,16 @@ public class CarService : ICarService
         };
 
         var created = await _repository.CreateAsync(entity, cancellationToken);
+
+        await _messageProducer.ProduceAsync(new CarCreatedMessage
+        {
+            Id = created.Id,
+            Make = created.Make,
+            Model = created.Model,
+            Year = created.Year,
+            CreatedAt = created.CreatedAt
+        }, cancellationToken);
+
         return new CreateCarCommandResponse { Car = MapToModel(created) };
     }
 
