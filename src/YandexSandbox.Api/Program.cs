@@ -1,5 +1,5 @@
 using FluentValidation;
-using YandexSandbox.Api.Filters;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using YandexSandbox.Bll.Interfaces;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Interfaces;
@@ -7,14 +7,12 @@ using YandexSandbox.Dal.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<ValidationActionFilter>();
-});
+builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddSingleton<ICarRepository, InMemoryCarRepository>();
 builder.Services.AddScoped<ICarService, CarService>();
