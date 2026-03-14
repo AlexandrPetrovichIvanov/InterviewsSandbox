@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Moq;
 using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Interfaces;
@@ -100,7 +101,7 @@ public class CarServiceTests
     [Theory]
     [InlineData(1800)]
     [InlineData(2030)]
-    public async Task CreateAsync_WithInvalidYear_ThrowsArgumentException(int year)
+    public async Task CreateAsync_WithInvalidYear_ThrowsInvalidCarYearException(int year)
     {
         var command = new CreateCarCommand
         {
@@ -109,12 +110,12 @@ public class CarServiceTests
 
         var act = () => _sut.CreateAsync(command);
 
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("Year is out of valid range.*");
+        var ex = await act.Should().ThrowAsync<InvalidCarYearException>();
+        ex.Which.Year.Should().Be(year);
     }
 
     [Fact]
-    public async Task CreateAsync_WithInvalidVin_ThrowsArgumentException()
+    public async Task CreateAsync_WithInvalidVin_ThrowsInvalidVinException()
     {
         var command = new CreateCarCommand
         {
@@ -123,8 +124,8 @@ public class CarServiceTests
 
         var act = () => _sut.CreateAsync(command);
 
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("VIN must be exactly 17 characters.*");
+        var ex = await act.Should().ThrowAsync<InvalidVinException>();
+        ex.Which.Vin.Should().Be("SHORT");
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using FluentValidation;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+using YandexSandbox.Api;
 using YandexSandbox.Bll.Interfaces;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Interfaces;
@@ -18,6 +19,8 @@ builder.Services.AddSingleton<ICarRepository, InMemoryCarRepository>();
 builder.Services.AddScoped<ICarService, CarService>();
 
 var app = builder.Build();
+
+app.UseBusinessExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,5 +1,6 @@
 using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.CommonModels;
+using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Dal.Interfaces;
@@ -30,11 +31,12 @@ public class CarService : ICarService
 
     public async Task<CreateCarCommandResponse> CreateAsync(CreateCarCommand command, CancellationToken cancellationToken = default)
     {
-        if (command.Year < 1886 || command.Year > DateTime.UtcNow.Year + 1)
-            throw new ArgumentException("Year is out of valid range.", nameof(command));
+        var maxYear = DateTime.UtcNow.Year + 1;
+        if (command.Year < 1886 || command.Year > maxYear)
+            throw new InvalidCarYearException(command.Year, 1886, maxYear);
 
         if (command.Vin is not null && command.Vin.Length != 17)
-            throw new ArgumentException("VIN must be exactly 17 characters.", nameof(command));
+            throw new InvalidVinException(command.Vin);
 
         var entity = new CarEntity
         {
