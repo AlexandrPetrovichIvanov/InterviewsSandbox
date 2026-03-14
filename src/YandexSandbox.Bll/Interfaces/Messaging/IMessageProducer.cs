@@ -1,4 +1,4 @@
-namespace YandexSandbox.Bll.Messaging;
+namespace YandexSandbox.Bll.Interfaces.Messaging;
 
 public interface IMessageProducer
 {

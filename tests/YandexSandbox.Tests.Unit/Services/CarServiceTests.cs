@@ -2,13 +2,14 @@ using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.CommonModels;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
+using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Messaging;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
-using YandexSandbox.Dal.Interfaces;
-using YandexSandbox.Dal.Entities;
 
 namespace YandexSandbox.Tests.Unit.Services;
 
@@ -29,7 +30,7 @@ public class CarServiceTests
     [Fact]
     public async Task GetByIdAsync_WhenCarExists_ReturnsResponse()
     {
-        var car = new CarEntity
+        var car = new CarModel
         {
             Id = 1, Make = "Toyota", Model = "Camry", Year = 2023,
             Color = "White", Mileage = 15000, Vin = "1HGBH41JXMN109186",
@@ -54,7 +55,7 @@ public class CarServiceTests
     public async Task GetByIdAsync_WhenCarDoesNotExist_ReturnsNull()
     {
         _repositoryMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarEntity?)null);
+            .ReturnsAsync((CarModel?)null);
 
         var result = await _sut.GetByIdAsync(new GetCarByIdQuery { Id = 999 });
 
@@ -64,7 +65,7 @@ public class CarServiceTests
     [Fact]
     public async Task GetAllAsync_ReturnsAllCars()
     {
-        var cars = new List<CarEntity>
+        var cars = new List<CarModel>
         {
             new() { Id = 1, Make = "Toyota", Model = "Camry", Year = 2023, Color = "White" },
             new() { Id = 2, Make = "Honda", Model = "Civic", Year = 2024, Color = "Black" }
@@ -87,12 +88,12 @@ public class CarServiceTests
             Make = "BMW", Model = "X5", Year = 2024,
             Color = "Black", Mileage = 0, Vin = "WBAPH5C55BA271043"
         };
-        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarEntity>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarEntity entity, CancellationToken _) =>
+        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CarModel model, CancellationToken _) =>
             {
-                entity.Id = 1;
-                entity.CreatedAt = DateTime.UtcNow;
-                return entity;
+                model.Id = 1;
+                model.CreatedAt = DateTime.UtcNow;
+                return model;
             });
 
         var result = await _sut.CreateAsync(command);
@@ -101,7 +102,7 @@ public class CarServiceTests
         result.Car.Make.Should().Be("BMW");
         result.Car.Model.Should().Be("X5");
         result.Car.Year.Should().Be(2024);
-        _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<CarEntity>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()), Times.Once);
         _messageProducerMock.Verify(p => p.ProduceAsync(
             It.Is<CarCreatedMessage>(m => m.Id == 1 && m.Make == "BMW" && m.Model == "X5"),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -161,12 +162,12 @@ public class CarServiceTests
         {
             Make = "BMW", Model = "X5", Year = 2024, Color = "Black", Vin = null
         };
-        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarEntity>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarEntity entity, CancellationToken _) =>
+        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CarModel model, CancellationToken _) =>
             {
-                entity.Id = 1;
-                entity.CreatedAt = DateTime.UtcNow;
-                return entity;
+                model.Id = 1;
+                model.CreatedAt = DateTime.UtcNow;
+                return model;
             });
 
         var result = await _sut.CreateAsync(command);

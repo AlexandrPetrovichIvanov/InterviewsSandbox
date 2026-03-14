@@ -1,7 +1,7 @@
 using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.Queries;
 
-namespace YandexSandbox.Bll.Interfaces;
+namespace YandexSandbox.Bll.Interfaces.Services;
 
 public interface ICarService
 {

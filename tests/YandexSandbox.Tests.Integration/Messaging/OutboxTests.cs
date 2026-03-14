@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using YandexSandbox.Api.Messaging;
 using YandexSandbox.Api.Requests;
+using YandexSandbox.Api.Responses;
 using YandexSandbox.Bll.Messaging;
 
 namespace YandexSandbox.Tests.Integration.Messaging;
@@ -41,5 +42,40 @@ public class OutboxTests
         message.Model.Should().Be("S-Class");
         message.Year.Should().Be(2025);
         message.Id.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task PlaceOrder_ProducesOrderPlacedMessageToOutbox()
+    {
+        var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.RemoveAll<IHostedService>();
+                });
+            });
+
+        var client = factory.CreateClient();
+        var outbox = factory.Services.GetRequiredService<InMemoryOutboxStorage>();
+
+        var carRequest = new CreateCarApiRequest
+        {
+            Make = "BMW", Model = "X5", Year = 2025, Color = "Black"
+        };
+        var carResponse = await client.PostAsJsonAsync("/api/cars", carRequest);
+        var car = await carResponse.Content.ReadFromJsonAsync<CarApiResponse>();
+
+        // Drain the car-created message
+        outbox.TryTake(out _);
+
+        await client.PostAsJsonAsync("/api/rent/orders",
+            new PlaceOrderApiRequest { CarId = car!.Id });
+
+        outbox.TryTake(out var entry).Should().BeTrue();
+        entry!.Topic.Should().Be("order-placed");
+        var message = entry.Message.Should().BeOfType<OrderPlacedMessage>().Subject;
+        message.CarId.Should().Be(car.Id);
+        message.OrderId.Should().BeGreaterThan(0);
     }
 }

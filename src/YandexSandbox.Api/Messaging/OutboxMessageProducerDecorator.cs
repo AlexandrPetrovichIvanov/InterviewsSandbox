@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Options;
-using YandexSandbox.Bll.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging;
 
 namespace YandexSandbox.Api.Messaging;
 

@@ -3,11 +3,11 @@ using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.CommonModels;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
-using YandexSandbox.Bll.Interfaces;
+using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Repositories;
+using YandexSandbox.Bll.Interfaces.Services;
 using YandexSandbox.Bll.Messaging;
 using YandexSandbox.Bll.Queries;
-using YandexSandbox.Dal.Interfaces;
-using YandexSandbox.Dal.Entities;
 
 namespace YandexSandbox.Bll.Services;
 
@@ -30,13 +30,13 @@ public class CarService : ICarService
     public async Task<GetCarByIdQueryResponse?> GetByIdAsync(GetCarByIdQuery query, CancellationToken cancellationToken = default)
     {
         var car = await _repository.GetByIdAsync(query.Id, cancellationToken);
-        return car is null ? null : new GetCarByIdQueryResponse { Car = MapToModel(car) };
+        return car is null ? null : new GetCarByIdQueryResponse { Car = car };
     }
 
     public async Task<GetAllCarsQueryResponse> GetAllAsync(GetAllCarsQuery query, CancellationToken cancellationToken = default)
     {
         var cars = await _repository.GetAllAsync(cancellationToken);
-        return new GetAllCarsQueryResponse { Cars = cars.Select(MapToModel).ToList() };
+        return new GetAllCarsQueryResponse { Cars = cars };
     }
 
     public async Task<CreateCarCommandResponse> CreateAsync(CreateCarCommand command, CancellationToken cancellationToken = default)
@@ -48,7 +48,7 @@ public class CarService : ICarService
         if (command.Vin is not null && command.Vin.Length != 17)
             throw new InvalidVinException(command.Vin);
 
-        var entity = new CarEntity
+        var model = new CarModel
         {
             Make = command.Make,
             Model = command.Model,
@@ -58,7 +58,7 @@ public class CarService : ICarService
             Vin = command.Vin
         };
 
-        var created = await _repository.CreateAsync(entity, cancellationToken);
+        var created = await _repository.CreateAsync(model, cancellationToken);
 
         await _messageProducer.ProduceAsync(new CarCreatedMessage
         {
@@ -69,18 +69,6 @@ public class CarService : ICarService
             CreatedAt = created.CreatedAt
         }, cancellationToken);
 
-        return new CreateCarCommandResponse { Car = MapToModel(created) };
+        return new CreateCarCommandResponse { Car = created };
     }
-
-    private static CarModel MapToModel(CarEntity car) => new()
-    {
-        Id = car.Id,
-        Make = car.Make,
-        Model = car.Model,
-        Year = car.Year,
-        Color = car.Color,
-        Mileage = car.Mileage,
-        Vin = car.Vin,
-        CreatedAt = car.CreatedAt
-    };
 }
