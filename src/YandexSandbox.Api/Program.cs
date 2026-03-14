@@ -1,6 +1,7 @@
 using FluentValidation;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using YandexSandbox.Api;
+using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Interfaces;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Interfaces;
@@ -14,6 +15,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.Configure<CarValidationSettings>(
+    builder.Configuration.GetSection("CarValidation"));
 
 builder.Services.AddSingleton<ICarRepository, InMemoryCarRepository>();
 builder.Services.AddScoped<ICarService, CarService>();

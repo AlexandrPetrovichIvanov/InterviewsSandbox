@@ -1,6 +1,8 @@
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using Moq;
 using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
@@ -17,7 +19,8 @@ public class CarServiceTests
     public CarServiceTests()
     {
         _repositoryMock = new Mock<ICarRepository>();
-        _sut = new CarService(_repositoryMock.Object);
+        var settings = Options.Create(new CarValidationSettings());
+        _sut = new CarService(_repositoryMock.Object, settings);
     }
 
     [Fact]
@@ -112,6 +115,23 @@ public class CarServiceTests
 
         var ex = await act.Should().ThrowAsync<InvalidCarYearException>();
         ex.Which.Year.Should().Be(year);
+        ex.Which.MinYear.Should().Be(1886);
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithCustomMinYear_UsesConfiguredValue()
+    {
+        var settings = Options.Create(new CarValidationSettings { MinYear = 2000 });
+        var sut = new CarService(_repositoryMock.Object, settings);
+        var command = new CreateCarCommand
+        {
+            Make = "Ford", Model = "T", Year = 1950, Color = "Black"
+        };
+
+        var act = () => sut.CreateAsync(command);
+
+        var ex = await act.Should().ThrowAsync<InvalidCarYearException>();
+        ex.Which.MinYear.Should().Be(2000);
     }
 
     [Fact]

@@ -1,5 +1,7 @@
+using Microsoft.Extensions.Options;
 using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.CommonModels;
+using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces;
 using YandexSandbox.Bll.Queries;
@@ -11,10 +13,12 @@ namespace YandexSandbox.Bll.Services;
 public class CarService : ICarService
 {
     private readonly ICarRepository _repository;
+    private readonly CarValidationSettings _settings;
 
-    public CarService(ICarRepository repository)
+    public CarService(ICarRepository repository, IOptions<CarValidationSettings> settings)
     {
         _repository = repository;
+        _settings = settings.Value;
     }
 
     public async Task<GetCarByIdQueryResponse?> GetByIdAsync(GetCarByIdQuery query, CancellationToken cancellationToken = default)
@@ -32,8 +36,8 @@ public class CarService : ICarService
     public async Task<CreateCarCommandResponse> CreateAsync(CreateCarCommand command, CancellationToken cancellationToken = default)
     {
         var maxYear = DateTime.UtcNow.Year + 1;
-        if (command.Year < 1886 || command.Year > maxYear)
-            throw new InvalidCarYearException(command.Year, 1886, maxYear);
+        if (command.Year < _settings.MinYear || command.Year > maxYear)
+            throw new InvalidCarYearException(command.Year, _settings.MinYear, maxYear);
 
         if (command.Vin is not null && command.Vin.Length != 17)
             throw new InvalidVinException(command.Vin);
