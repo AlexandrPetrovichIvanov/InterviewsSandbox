@@ -97,39 +97,14 @@ public class CarServiceTests
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task CreateAsync_WithEmptyMake_ThrowsArgumentException(string? make)
-    {
-        var request = new CreateCarRequest { Make = make!, Model = "Civic", Year = 2024, Color = "Red" };
-
-        var act = () => _sut.CreateAsync(request);
-
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("Make is required.*");
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task CreateAsync_WithEmptyModel_ThrowsArgumentException(string? model)
-    {
-        var request = new CreateCarRequest { Make = "Honda", Model = model!, Year = 2024, Color = "Blue" };
-
-        var act = () => _sut.CreateAsync(request);
-
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("Model is required.*");
-    }
-
-    [Theory]
     [InlineData(1800)]
     [InlineData(2030)]
     public async Task CreateAsync_WithInvalidYear_ThrowsArgumentException(int year)
     {
-        var request = new CreateCarRequest { Make = "Toyota", Model = "Supra", Year = year, Color = "Red" };
+        var request = new CreateCarRequest
+        {
+            Make = "Toyota", Model = "Supra", Year = year, Color = "Red"
+        };
 
         var act = () => _sut.CreateAsync(request);
 
@@ -138,21 +113,36 @@ public class CarServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_TrimsWhitespace()
+    public async Task CreateAsync_WithInvalidVin_ThrowsArgumentException()
     {
         var request = new CreateCarRequest
         {
-            Make = "  Toyota  ", Model = "  Camry  ", Year = 2023,
-            Color = "  Red  ", Vin = "  ABC123  "
+            Make = "Audi", Model = "A4", Year = 2024, Color = "Silver", Vin = "SHORT"
+        };
+
+        var act = () => _sut.CreateAsync(request);
+
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("VIN must be exactly 17 characters.*");
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithNullVin_DoesNotThrow()
+    {
+        var request = new CreateCarRequest
+        {
+            Make = "BMW", Model = "X5", Year = 2024, Color = "Black", Vin = null
         };
         _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<Car>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Car entity, CancellationToken _) => entity);
+            .ReturnsAsync((Car entity, CancellationToken _) =>
+            {
+                entity.Id = 1;
+                entity.CreatedAt = DateTime.UtcNow;
+                return entity;
+            });
 
         var result = await _sut.CreateAsync(request);
 
-        result.Make.Should().Be("Toyota");
-        result.Model.Should().Be("Camry");
-        result.Color.Should().Be("Red");
-        result.Vin.Should().Be("ABC123");
+        result.Vin.Should().BeNull();
     }
 }

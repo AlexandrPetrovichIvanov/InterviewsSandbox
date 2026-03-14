@@ -28,23 +28,20 @@ public class CarService : ICarService
 
     public async Task<CarDto> CreateAsync(CreateCarRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(request.Make))
-            throw new ArgumentException("Make is required.", nameof(request));
-
-        if (string.IsNullOrWhiteSpace(request.Model))
-            throw new ArgumentException("Model is required.", nameof(request));
-
         if (request.Year < 1886 || request.Year > DateTime.UtcNow.Year + 1)
             throw new ArgumentException("Year is out of valid range.", nameof(request));
 
+        if (request.Vin is not null && request.Vin.Length != 17)
+            throw new ArgumentException("VIN must be exactly 17 characters.", nameof(request));
+
         var entity = new Car
         {
-            Make = request.Make.Trim(),
-            Model = request.Model.Trim(),
+            Make = request.Make,
+            Model = request.Model,
             Year = request.Year,
-            Color = request.Color.Trim(),
+            Color = request.Color,
             Mileage = request.Mileage,
-            Vin = request.Vin?.Trim()
+            Vin = request.Vin
         };
 
         var created = await _repository.CreateAsync(entity, cancellationToken);

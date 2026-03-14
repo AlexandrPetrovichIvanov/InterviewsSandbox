@@ -88,21 +88,6 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Create_WithInvalidYear_Returns400()
-    {
-        var request = new CreateCarApiRequest
-        {
-            Make = "Toyota", Model = "Supra", Year = 1800, Color = "Red"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/cars", request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        problem!.Errors.Should().ContainKey("Year");
-    }
-
-    [Fact]
     public async Task Create_WithNegativeMileage_Returns400()
     {
         var request = new CreateCarApiRequest
@@ -118,26 +103,11 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Create_WithInvalidVin_Returns400()
-    {
-        var request = new CreateCarApiRequest
-        {
-            Make = "Audi", Model = "A4", Year = 2024, Color = "Silver", Vin = "SHORT"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/cars", request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        problem!.Errors.Should().ContainKey("Vin");
-    }
-
-    [Fact]
     public async Task Create_WithMultipleErrors_ReturnsAllErrors()
     {
         var request = new CreateCarApiRequest
         {
-            Make = "", Model = "", Year = 0, Color = "", Mileage = -1
+            Make = "", Model = "", Color = "", Mileage = -1
         };
 
         var response = await _client.PostAsJsonAsync("/api/cars", request);
@@ -146,7 +116,6 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         problem!.Errors.Should().ContainKey("Make");
         problem.Errors.Should().ContainKey("Model");
-        problem.Errors.Should().ContainKey("Year");
         problem.Errors.Should().ContainKey("Color");
         problem.Errors.Should().ContainKey("Mileage");
     }

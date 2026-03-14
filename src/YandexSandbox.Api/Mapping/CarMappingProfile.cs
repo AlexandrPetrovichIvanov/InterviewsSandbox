@@ -8,7 +8,12 @@ public class CarMappingProfile : Profile
 {
     public CarMappingProfile()
     {
-        CreateMap<CreateCarApiRequest, CreateCarRequest>();
+        CreateMap<CreateCarApiRequest, CreateCarRequest>()
+            .ForMember(d => d.Make, o => o.MapFrom(s => s.Make!.Trim()))
+            .ForMember(d => d.Model, o => o.MapFrom(s => s.Model!.Trim()))
+            .ForMember(d => d.Color, o => o.MapFrom(s => s.Color!.Trim()))
+            .ForMember(d => d.Vin, o => o.MapFrom(s => s.Vin != null ? s.Vin.Trim() : null));
+
         CreateMap<CarDto, CarApiResponse>();
     }
 }
