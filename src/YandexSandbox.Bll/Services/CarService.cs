@@ -1,7 +1,9 @@
+using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.CommonModels;
 using YandexSandbox.Bll.Interfaces;
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Queries;
 using YandexSandbox.Dal.Interfaces;
-using YandexSandbox.Dal.Models;
+using YandexSandbox.Dal.Entities;
 
 namespace YandexSandbox.Bll.Services;
 
@@ -14,41 +16,41 @@ public class CarService : ICarService
         _repository = repository;
     }
 
-    public async Task<CarDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<GetCarByIdQueryResponse?> GetByIdAsync(GetCarByIdQuery query, CancellationToken cancellationToken = default)
     {
-        var car = await _repository.GetByIdAsync(id, cancellationToken);
-        return car is null ? null : MapToDto(car);
+        var car = await _repository.GetByIdAsync(query.Id, cancellationToken);
+        return car is null ? null : new GetCarByIdQueryResponse { Car = MapToModel(car) };
     }
 
-    public async Task<IReadOnlyList<CarDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<GetAllCarsQueryResponse> GetAllAsync(GetAllCarsQuery query, CancellationToken cancellationToken = default)
     {
         var cars = await _repository.GetAllAsync(cancellationToken);
-        return cars.Select(MapToDto).ToList();
+        return new GetAllCarsQueryResponse { Cars = cars.Select(MapToModel).ToList() };
     }
 
-    public async Task<CarDto> CreateAsync(CreateCarRequest request, CancellationToken cancellationToken = default)
+    public async Task<CreateCarCommandResponse> CreateAsync(CreateCarCommand command, CancellationToken cancellationToken = default)
     {
-        if (request.Year < 1886 || request.Year > DateTime.UtcNow.Year + 1)
-            throw new ArgumentException("Year is out of valid range.", nameof(request));
+        if (command.Year < 1886 || command.Year > DateTime.UtcNow.Year + 1)
+            throw new ArgumentException("Year is out of valid range.", nameof(command));
 
-        if (request.Vin is not null && request.Vin.Length != 17)
-            throw new ArgumentException("VIN must be exactly 17 characters.", nameof(request));
+        if (command.Vin is not null && command.Vin.Length != 17)
+            throw new ArgumentException("VIN must be exactly 17 characters.", nameof(command));
 
-        var entity = new Car
+        var entity = new CarEntity
         {
-            Make = request.Make,
-            Model = request.Model,
-            Year = request.Year,
-            Color = request.Color,
-            Mileage = request.Mileage,
-            Vin = request.Vin
+            Make = command.Make,
+            Model = command.Model,
+            Year = command.Year,
+            Color = command.Color,
+            Mileage = command.Mileage,
+            Vin = command.Vin
         };
 
         var created = await _repository.CreateAsync(entity, cancellationToken);
-        return MapToDto(created);
+        return new CreateCarCommandResponse { Car = MapToModel(created) };
     }
 
-    private static CarDto MapToDto(Car car) => new()
+    private static CarModel MapToModel(CarEntity car) => new()
     {
         Id = car.Id,
         Make = car.Make,

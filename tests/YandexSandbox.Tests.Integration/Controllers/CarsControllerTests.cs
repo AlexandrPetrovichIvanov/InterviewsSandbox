@@ -3,7 +3,8 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
-using YandexSandbox.Api.Models;
+using YandexSandbox.Api.Requests;
+using YandexSandbox.Api.Responses;
 
 namespace YandexSandbox.Tests.Integration.Controllers;
 

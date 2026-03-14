@@ -1,8 +1,10 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using YandexSandbox.Api.Models;
+using YandexSandbox.Api.Requests;
+using YandexSandbox.Api.Responses;
+using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.Interfaces;
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Api.Controllers;
 
@@ -22,18 +24,18 @@ public class CarsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<CarApiResponse>>> GetAll(CancellationToken cancellationToken)
     {
-        var cars = await _carService.GetAllAsync(cancellationToken);
-        return Ok(_mapper.Map<List<CarApiResponse>>(cars));
+        var response = await _carService.GetAllAsync(new GetAllCarsQuery(), cancellationToken);
+        return Ok(_mapper.Map<List<CarApiResponse>>(response.Cars));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CarApiResponse>> GetById(int id, CancellationToken cancellationToken)
     {
-        var car = await _carService.GetByIdAsync(id, cancellationToken);
-        if (car is null)
+        var response = await _carService.GetByIdAsync(new GetCarByIdQuery { Id = id }, cancellationToken);
+        if (response is null)
             return NotFound();
 
-        return Ok(_mapper.Map<CarApiResponse>(car));
+        return Ok(_mapper.Map<CarApiResponse>(response.Car));
     }
 
     [HttpPost]
@@ -41,9 +43,9 @@ public class CarsController : ControllerBase
         [FromBody] CreateCarApiRequest request,
         CancellationToken cancellationToken)
     {
-        var bllRequest = _mapper.Map<CreateCarRequest>(request);
-        var created = await _carService.CreateAsync(bllRequest, cancellationToken);
-        var response = _mapper.Map<CarApiResponse>(created);
-        return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
+        var command = _mapper.Map<CreateCarCommand>(request);
+        var response = await _carService.CreateAsync(command, cancellationToken);
+        var apiResponse = _mapper.Map<CarApiResponse>(response.Car);
+        return CreatedAtAction(nameof(GetById), new { id = apiResponse.Id }, apiResponse);
     }
 }

@@ -1,10 +1,11 @@
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Interfaces;
 
 public interface ICarService
 {
-    Task<CarDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<CarDto>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<CarDto> CreateAsync(CreateCarRequest request, CancellationToken cancellationToken = default);
+    Task<GetCarByIdQueryResponse?> GetByIdAsync(GetCarByIdQuery query, CancellationToken cancellationToken = default);
+    Task<GetAllCarsQueryResponse> GetAllAsync(GetAllCarsQuery query, CancellationToken cancellationToken = default);
+    Task<CreateCarCommandResponse> CreateAsync(CreateCarCommand command, CancellationToken cancellationToken = default);
 }

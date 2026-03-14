@@ -1,5 +1,5 @@
 using FluentValidation;
-using YandexSandbox.Api.Models;
+using YandexSandbox.Api.Requests;
 
 namespace YandexSandbox.Api.Validators;
 

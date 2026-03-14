@@ -1,6 +1,6 @@
-namespace YandexSandbox.Bll.Models;
+namespace YandexSandbox.Api.Responses;
 
-public class CarDto
+public class CarApiResponse
 {
     public int Id { get; set; }
     public required string Make { get; set; }
