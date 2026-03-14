@@ -1,4 +1,4 @@
-namespace YandexSandbox.Api.Models;
+namespace YandexSandbox.Api.Requests;
 
 public class CreateCarApiRequest
 {

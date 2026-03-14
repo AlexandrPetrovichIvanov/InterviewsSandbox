@@ -1,5 +1,5 @@
 using FluentValidation;
-using YandexSandbox.Api.Models;
+using YandexSandbox.Api.Requests;
 
 namespace YandexSandbox.Api.Validators;
 
@@ -15,19 +15,11 @@ public class CreateCarApiRequestValidator : AbstractValidator<CreateCarApiReques
             .NotEmpty().WithMessage("Model is required.")
             .MaximumLength(100);
 
-        RuleFor(x => x.Year)
-            .InclusiveBetween(1886, DateTime.UtcNow.Year + 1)
-            .WithMessage($"Year must be between 1886 and {DateTime.UtcNow.Year + 1}.");
-
         RuleFor(x => x.Color)
             .NotEmpty().WithMessage("Color is required.")
             .MaximumLength(50);
 
         RuleFor(x => x.Mileage)
             .GreaterThanOrEqualTo(0).WithMessage("Mileage cannot be negative.");
-
-        RuleFor(x => x.Vin)
-            .Length(17).When(x => !string.IsNullOrEmpty(x.Vin))
-            .WithMessage("VIN must be exactly 17 characters.");
     }
 }

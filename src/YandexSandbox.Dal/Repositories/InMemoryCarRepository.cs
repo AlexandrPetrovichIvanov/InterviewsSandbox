@@ -1,27 +1,27 @@
 using System.Collections.Concurrent;
 using YandexSandbox.Dal.Interfaces;
-using YandexSandbox.Dal.Models;
+using YandexSandbox.Dal.Entities;
 
 namespace YandexSandbox.Dal.Repositories;
 
 public class InMemoryCarRepository : ICarRepository
 {
-    private readonly ConcurrentDictionary<int, Car> _cars = new();
+    private readonly ConcurrentDictionary<int, CarEntity> _cars = new();
     private int _nextId;
 
-    public Task<Car?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<CarEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         _cars.TryGetValue(id, out var car);
         return Task.FromResult(car);
     }
 
-    public Task<IReadOnlyList<Car>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<CarEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<Car> cars = _cars.Values.OrderBy(x => x.Id).ToList();
+        IReadOnlyList<CarEntity> cars = _cars.Values.OrderBy(x => x.Id).ToList();
         return Task.FromResult(cars);
     }
 
-    public Task<Car> CreateAsync(Car car, CancellationToken cancellationToken = default)
+    public Task<CarEntity> CreateAsync(CarEntity car, CancellationToken cancellationToken = default)
     {
         car.Id = Interlocked.Increment(ref _nextId);
         car.CreatedAt = DateTime.UtcNow;

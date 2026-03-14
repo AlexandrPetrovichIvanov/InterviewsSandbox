@@ -3,16 +3,22 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
-using YandexSandbox.Api.Models;
+using Microsoft.Extensions.DependencyInjection;
+using YandexSandbox.Api.Messaging;
+using YandexSandbox.Bll.Messaging;
+using YandexSandbox.Api.Requests;
+using YandexSandbox.Api.Responses;
 
 namespace YandexSandbox.Tests.Integration.Controllers;
 
 public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
     public CarsControllerTests(WebApplicationFactory<Program> factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -88,21 +94,6 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Create_WithInvalidYear_Returns400()
-    {
-        var request = new CreateCarApiRequest
-        {
-            Make = "Toyota", Model = "Supra", Year = 1800, Color = "Red"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/cars", request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        problem!.Errors.Should().ContainKey("Year");
-    }
-
-    [Fact]
     public async Task Create_WithNegativeMileage_Returns400()
     {
         var request = new CreateCarApiRequest
@@ -118,26 +109,11 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Create_WithInvalidVin_Returns400()
-    {
-        var request = new CreateCarApiRequest
-        {
-            Make = "Audi", Model = "A4", Year = 2024, Color = "Silver", Vin = "SHORT"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/cars", request);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        problem!.Errors.Should().ContainKey("Vin");
-    }
-
-    [Fact]
     public async Task Create_WithMultipleErrors_ReturnsAllErrors()
     {
         var request = new CreateCarApiRequest
         {
-            Make = "", Model = "", Year = 0, Color = "", Mileage = -1
+            Make = "", Model = "", Color = "", Mileage = -1
         };
 
         var response = await _client.PostAsJsonAsync("/api/cars", request);
@@ -146,8 +122,38 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         problem!.Errors.Should().ContainKey("Make");
         problem.Errors.Should().ContainKey("Model");
-        problem.Errors.Should().ContainKey("Year");
         problem.Errors.Should().ContainKey("Color");
         problem.Errors.Should().ContainKey("Mileage");
     }
+
+    [Fact]
+    public async Task Create_WithInvalidYear_Returns422()
+    {
+        var request = new CreateCarApiRequest
+        {
+            Make = "Toyota", Model = "Supra", Year = 1800, Color = "Red"
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/cars", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        problem!.Detail.Should().Contain("1800");
+    }
+
+    [Fact]
+    public async Task Create_WithInvalidVin_Returns422()
+    {
+        var request = new CreateCarApiRequest
+        {
+            Make = "Audi", Model = "A4", Year = 2024, Color = "Silver", Vin = "SHORT"
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/cars", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        problem!.Detail.Should().Contain("17 characters");
+    }
+
 }
