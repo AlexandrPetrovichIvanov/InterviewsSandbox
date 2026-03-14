@@ -1,8 +1,6 @@
-using YandexSandbox.Bll.Messaging;
-
 namespace YandexSandbox.Api.Messaging;
 
-public class InMemoryMessageProducer : IMessageProducer
+public class InMemoryMessageProducer
 {
     private readonly ILogger<InMemoryMessageProducer> _logger;
 

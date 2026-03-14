@@ -3,6 +3,9 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using YandexSandbox.Api.Messaging;
+using YandexSandbox.Bll.Messaging;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
 
@@ -10,10 +13,12 @@ namespace YandexSandbox.Tests.Integration.Controllers;
 
 public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
     public CarsControllerTests(WebApplicationFactory<Program> factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -150,4 +155,5 @@ public class CarsControllerTests : IClassFixture<WebApplicationFactory<Program>>
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         problem!.Detail.Should().Contain("17 characters");
     }
+
 }

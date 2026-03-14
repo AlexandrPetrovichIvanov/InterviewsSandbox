@@ -1,0 +1,45 @@
+using System.Net.Http.Json;
+using FluentAssertions;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using YandexSandbox.Api.Messaging;
+using YandexSandbox.Api.Requests;
+using YandexSandbox.Bll.Messaging;
+
+namespace YandexSandbox.Tests.Integration.Messaging;
+
+public class OutboxTests
+{
+    [Fact]
+    public async Task Create_ProducesMessageToOutbox()
+    {
+        var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.RemoveAll<IHostedService>();
+                });
+            });
+
+        var client = factory.CreateClient();
+        var outbox = factory.Services.GetRequiredService<InMemoryOutboxStorage>();
+
+        var request = new CreateCarApiRequest
+        {
+            Make = "Mercedes", Model = "S-Class", Year = 2025, Color = "Black"
+        };
+
+        await client.PostAsJsonAsync("/api/cars", request);
+
+        outbox.TryTake(out var entry).Should().BeTrue();
+        entry!.Topic.Should().Be("car-created");
+        var message = entry.Message.Should().BeOfType<CarCreatedMessage>().Subject;
+        message.Make.Should().Be("Mercedes");
+        message.Model.Should().Be("S-Class");
+        message.Year.Should().Be(2025);
+        message.Id.Should().BeGreaterThan(0);
+    }
+}
