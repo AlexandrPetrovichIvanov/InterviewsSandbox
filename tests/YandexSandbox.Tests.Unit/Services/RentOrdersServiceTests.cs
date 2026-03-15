@@ -47,10 +47,9 @@ public class RentOrdersServiceTests
     private void SetupOrderCreate(int assignedId = 10)
     {
         _orderRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<RentOrderModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((RentOrderModel m, CancellationToken _) =>
+            .ReturnsAsync((RentOrderModel m, CancellationToken _) => new RentOrderModel
             {
-                m.Id = assignedId;
-                return m;
+                Id = assignedId, CarId = m.CarId, Processed = m.Processed
             });
     }
 

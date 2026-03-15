@@ -60,9 +60,15 @@ public class RentOrdersService : IRentOrdersService
         if (order is null)
             throw new RentOrderNotFoundException(command.OrderId);
 
-        order.Processed = true;
-        await _orderRepository.UpdateAsync(order, cancellationToken);
+        var updated = new RentOrderModel
+        {
+            Id = order.Id,
+            CarId = order.CarId,
+            Processed = true,
+            CreatedAt = order.CreatedAt
+        };
+        await _orderRepository.UpdateAsync(updated, cancellationToken);
 
-        return new ProcessRentOrderCommandResponse { Order = order };
+        return new ProcessRentOrderCommandResponse { Order = updated };
     }
 }

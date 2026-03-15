@@ -23,9 +23,18 @@ public class InMemoryCarRepository : ICarRepository
 
     public Task<CarModel> CreateAsync(CarModel car, CancellationToken cancellationToken = default)
     {
-        car.Id = Interlocked.Increment(ref _nextId);
-        car.CreatedAt = DateTime.UtcNow;
-        _cars[car.Id] = car;
-        return Task.FromResult(car);
+        var created = new CarModel
+        {
+            Id = Interlocked.Increment(ref _nextId),
+            Make = car.Make,
+            Model = car.Model,
+            Year = car.Year,
+            Color = car.Color,
+            Mileage = car.Mileage,
+            Vin = car.Vin,
+            CreatedAt = DateTime.UtcNow
+        };
+        _cars[created.Id] = created;
+        return Task.FromResult(created);
     }
 }

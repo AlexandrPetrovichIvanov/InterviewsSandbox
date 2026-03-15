@@ -9,10 +9,12 @@ namespace YandexSandbox.Api.Controllers;
 public class SystemController : ControllerBase
 {
     private readonly IRentOrderProcessedMessageHandler _handler;
+    private readonly IWebHostEnvironment _env;
 
-    public SystemController(IRentOrderProcessedMessageHandler handler)
+    public SystemController(IRentOrderProcessedMessageHandler handler, IWebHostEnvironment env)
     {
         _handler = handler;
+        _env = env;
     }
 
     [HttpPost("produce-rent-order-processed")]
@@ -20,6 +22,9 @@ public class SystemController : ControllerBase
         [FromBody] RentOrderProcessedMessage message,
         CancellationToken cancellationToken)
     {
+        if (!_env.IsDevelopment())
+            return NotFound();
+
         await _handler.HandleAsync(message, cancellationToken);
         return Ok();
     }

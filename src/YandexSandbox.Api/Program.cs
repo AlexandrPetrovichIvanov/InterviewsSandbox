@@ -1,12 +1,13 @@
 using FluentValidation;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using YandexSandbox.Api;
+using YandexSandbox.Api.Mapping;
 using YandexSandbox.Api.Messaging;
 using YandexSandbox.Api.Messaging.Produce;
 using YandexSandbox.Bll.Configuration;
-using YandexSandbox.Bll.Interfaces.Messaging.Messages;
 using YandexSandbox.Bll.Handlers;
 using YandexSandbox.Bll.Interfaces.Messaging.Handlers;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
 using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Interfaces.Services;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IMessageProducer<RentOrderPlacedMessage>, OutboxMessa
 
 var app = builder.Build();
 
+BllExceptionMap.ValidateAllExceptionsMapped();
 app.UseBusinessExceptionHandler();
 
 if (app.Environment.IsDevelopment())

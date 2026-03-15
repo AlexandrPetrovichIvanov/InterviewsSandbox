@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Interfaces.Models;
+using YandexSandbox.Bll.Interfaces.Repositories;
 
 namespace YandexSandbox.Dal.Repositories;
 
@@ -23,10 +23,15 @@ public class InMemoryRentOrderRepository : IRentOrderRepository
 
     public Task<RentOrderModel> CreateAsync(RentOrderModel order, CancellationToken cancellationToken = default)
     {
-        order.Id = Interlocked.Increment(ref _nextId);
-        order.CreatedAt = DateTime.UtcNow;
-        _orders[order.Id] = order;
-        return Task.FromResult(order);
+        var created = new RentOrderModel
+        {
+            Id = Interlocked.Increment(ref _nextId),
+            CarId = order.CarId,
+            Processed = order.Processed,
+            CreatedAt = DateTime.UtcNow
+        };
+        _orders[created.Id] = created;
+        return Task.FromResult(created);
     }
 
     public Task UpdateAsync(RentOrderModel order, CancellationToken cancellationToken = default)

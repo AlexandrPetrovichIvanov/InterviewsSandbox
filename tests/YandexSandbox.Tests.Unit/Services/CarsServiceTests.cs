@@ -38,10 +38,10 @@ public class CarsServiceTests
     private void SetupRepositoryCreate(int assignedId = 1)
     {
         _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarModel m, CancellationToken _) =>
+            .ReturnsAsync((CarModel m, CancellationToken _) => new CarModel
             {
-                m.Id = assignedId;
-                return m;
+                Id = assignedId, Make = m.Make, Model = m.Model, Year = m.Year,
+                Color = m.Color, Mileage = m.Mileage, Vin = m.Vin
             });
     }
 
