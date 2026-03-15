@@ -5,7 +5,7 @@ namespace YandexSandbox.Bll.Interfaces.Services;
 
 public interface IRentService
 {
-    Task<PlaceOrderCommandResponse> PlaceOrderAsync(PlaceOrderCommand command, CancellationToken cancellationToken = default);
-    Task<GetOrderByIdQueryResponse?> CheckOrderAsync(GetOrderByIdQuery query, CancellationToken cancellationToken = default);
-    Task<ProcessOrderCommandResponse> ProcessOrderAsync(ProcessOrderCommand command, CancellationToken cancellationToken = default);
+    Task<PlaceRentOrderCommandResponse> PlaceRentOrderAsync(PlaceRentOrderCommand command, CancellationToken cancellationToken = default);
+    Task<GetRentOrderByIdQueryResponse?> CheckRentOrderAsync(GetRentOrderByIdQuery query, CancellationToken cancellationToken = default);
+    Task<ProcessRentOrderCommandResponse> ProcessRentOrderAsync(ProcessRentOrderCommand command, CancellationToken cancellationToken = default);
 }

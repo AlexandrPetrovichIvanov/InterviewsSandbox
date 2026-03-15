@@ -14,7 +14,7 @@ namespace YandexSandbox.Tests.Integration.Messaging;
 public class OutboxTests
 {
     [Fact]
-    public async Task Create_ProducesMessageToOutbox()
+    public async Task CreateCar_ProducesMessageToOutbox()
     {
         var factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -45,7 +45,7 @@ public class OutboxTests
     }
 
     [Fact]
-    public async Task PlaceOrder_ProducesOrderPlacedMessageToOutbox()
+    public async Task PlaceRentOrder_ProducesRentOrderPlacedMessageToOutbox()
     {
         var factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
@@ -69,12 +69,12 @@ public class OutboxTests
         // Drain the car-created message
         outbox.TryTake(out _);
 
-        await client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car!.Id });
+        await client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car!.Id });
 
         outbox.TryTake(out var entry).Should().BeTrue();
-        entry!.Topic.Should().Be("order-placed");
-        var message = entry.Message.Should().BeOfType<OrderPlacedMessage>().Subject;
+        entry!.Topic.Should().Be("rent-order-placed");
+        var message = entry.Message.Should().BeOfType<RentOrderPlacedMessage>().Subject;
         message.CarId.Should().Be(car.Id);
         message.OrderId.Should().BeGreaterThan(0);
     }

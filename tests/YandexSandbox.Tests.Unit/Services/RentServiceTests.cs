@@ -27,7 +27,7 @@ public class RentServiceTests
     }
 
     [Fact]
-    public async Task PlaceOrderAsync_WhenCarExistsAndFree_CreatesOrderAndProducesMessage()
+    public async Task PlaceRentOrderAsync_WhenCarExistsAndFree_CreatesOrderAndProducesMessage()
     {
         _carRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CarModel { Id = 1, Make = "BMW", Model = "X5", Year = 2024, Color = "Black" });
@@ -41,45 +41,45 @@ public class RentServiceTests
                 return model;
             });
 
-        var result = await _sut.PlaceOrderAsync(new PlaceOrderCommand { CarId = 1 });
+        var result = await _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 1 });
 
         result.Order.Id.Should().Be(10);
         result.Order.CarId.Should().Be(1);
         result.Order.Processed.Should().BeFalse();
         _orderRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<RentOrderModel>(), It.IsAny<CancellationToken>()), Times.Once);
         _messageProducerMock.Verify(p => p.ProduceAsync(
-            It.Is<OrderPlacedMessage>(m => m.OrderId == 10 && m.CarId == 1),
+            It.Is<RentOrderPlacedMessage>(m => m.OrderId == 10 && m.CarId == 1),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task PlaceOrderAsync_WhenCarNotFound_ThrowsCarNotFoundException()
+    public async Task PlaceRentOrderAsync_WhenCarNotFound_ThrowsCarNotFoundException()
     {
         _carRepositoryMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((CarModel?)null);
 
-        var act = () => _sut.PlaceOrderAsync(new PlaceOrderCommand { CarId = 999 });
+        var act = () => _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 999 });
 
         var ex = await act.Should().ThrowAsync<CarNotFoundException>();
         ex.Which.CarId.Should().Be(999);
     }
 
     [Fact]
-    public async Task PlaceOrderAsync_WhenCarNotFree_ThrowsCarNotAvailableException()
+    public async Task PlaceRentOrderAsync_WhenCarNotFree_ThrowsCarNotAvailableException()
     {
         _carRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CarModel { Id = 1, Make = "BMW", Model = "X5", Year = 2024, Color = "Black" });
         _orderRepositoryMock.Setup(r => r.GetActiveByCarIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RentOrderModel { Id = 5, CarId = 1 });
 
-        var act = () => _sut.PlaceOrderAsync(new PlaceOrderCommand { CarId = 1 });
+        var act = () => _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 1 });
 
         var ex = await act.Should().ThrowAsync<CarNotAvailableException>();
         ex.Which.CarId.Should().Be(1);
     }
 
     [Fact]
-    public async Task CheckOrderAsync_WhenOrderExists_ReturnsResponse()
+    public async Task CheckRentOrderAsync_WhenOrderExists_ReturnsResponse()
     {
         var order = new RentOrderModel
         {
@@ -88,7 +88,7 @@ public class RentServiceTests
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
-        var result = await _sut.CheckOrderAsync(new GetOrderByIdQuery { Id = 1 });
+        var result = await _sut.CheckRentOrderAsync(new GetRentOrderByIdQuery { Id = 1 });
 
         result.Should().NotBeNull();
         result!.Order.Id.Should().Be(1);
@@ -97,24 +97,24 @@ public class RentServiceTests
     }
 
     [Fact]
-    public async Task CheckOrderAsync_WhenOrderNotFound_ReturnsNull()
+    public async Task CheckRentOrderAsync_WhenOrderNotFound_ReturnsNull()
     {
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((RentOrderModel?)null);
 
-        var result = await _sut.CheckOrderAsync(new GetOrderByIdQuery { Id = 999 });
+        var result = await _sut.CheckRentOrderAsync(new GetRentOrderByIdQuery { Id = 999 });
 
         result.Should().BeNull();
     }
 
     [Fact]
-    public async Task ProcessOrderAsync_WhenOrderExists_SetsProcessed()
+    public async Task ProcessRentOrderAsync_WhenOrderExists_SetsProcessed()
     {
         var order = new RentOrderModel { Id = 1, CarId = 5, Processed = false };
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
-        var result = await _sut.ProcessOrderAsync(new ProcessOrderCommand { OrderId = 1 });
+        var result = await _sut.ProcessRentOrderAsync(new ProcessRentOrderCommand { OrderId = 1 });
 
         result.Order.Processed.Should().BeTrue();
         _orderRepositoryMock.Verify(r => r.UpdateAsync(
@@ -123,14 +123,14 @@ public class RentServiceTests
     }
 
     [Fact]
-    public async Task ProcessOrderAsync_WhenOrderNotFound_ThrowsOrderNotFoundException()
+    public async Task ProcessRentOrderAsync_WhenOrderNotFound_ThrowsRentOrderNotFoundException()
     {
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((RentOrderModel?)null);
 
-        var act = () => _sut.ProcessOrderAsync(new ProcessOrderCommand { OrderId = 999 });
+        var act = () => _sut.ProcessRentOrderAsync(new ProcessRentOrderCommand { OrderId = 999 });
 
-        var ex = await act.Should().ThrowAsync<OrderNotFoundException>();
+        var ex = await act.Should().ThrowAsync<RentOrderNotFoundException>();
         ex.Which.OrderId.Should().Be(999);
     }
 }

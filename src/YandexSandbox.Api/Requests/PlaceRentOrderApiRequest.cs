@@ -1,6 +1,6 @@
 namespace YandexSandbox.Api.Requests;
 
-public class PlaceOrderApiRequest
+public class PlaceRentOrderApiRequest
 {
     public int CarId { get; set; }
 }

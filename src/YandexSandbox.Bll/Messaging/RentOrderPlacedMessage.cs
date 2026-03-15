@@ -1,6 +1,6 @@
 namespace YandexSandbox.Bll.Messaging;
 
-public class OrderPlacedMessage
+public class RentOrderPlacedMessage
 {
     public required int OrderId { get; init; }
     public required int CarId { get; init; }

@@ -1,10 +1,10 @@
 namespace YandexSandbox.Bll.Exceptions;
 
-public class OrderNotFoundException : BllException
+public class RentOrderNotFoundException : BllException
 {
     public int OrderId { get; }
 
-    public OrderNotFoundException(int orderId) : base()
+    public RentOrderNotFoundException(int orderId) : base()
     {
         OrderId = orderId;
     }

@@ -1,6 +1,6 @@
 namespace YandexSandbox.Bll.Commands;
 
-public class PlaceOrderCommand
+public class PlaceRentOrderCommand
 {
     public int CarId { get; set; }
 }

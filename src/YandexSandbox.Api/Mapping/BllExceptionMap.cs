@@ -10,7 +10,7 @@ public static class BllExceptionMap
         { typeof(InvalidVinException), StatusCodes.Status422UnprocessableEntity },
         { typeof(CarNotFoundException), StatusCodes.Status422UnprocessableEntity },
         { typeof(CarNotAvailableException), StatusCodes.Status422UnprocessableEntity },
-        { typeof(OrderNotFoundException), StatusCodes.Status422UnprocessableEntity }
+        { typeof(RentOrderNotFoundException), StatusCodes.Status422UnprocessableEntity }
     };
 
     private static readonly Dictionary<Type, Func<BllException, string>> MessageFormatters = new()
@@ -44,10 +44,10 @@ public static class BllExceptionMap
             }
         },
         {
-            typeof(OrderNotFoundException), ex =>
+            typeof(RentOrderNotFoundException), ex =>
             {
-                var e = (OrderNotFoundException)ex;
-                return $"Order with ID {e.OrderId} was not found.";
+                var e = (RentOrderNotFoundException)ex;
+                return $"Rent order with ID {e.OrderId} was not found.";
             }
         }
     };

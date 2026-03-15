@@ -1,8 +1,8 @@
 using YandexSandbox.Bll.Models;
 
-namespace YandexSandbox.Bll.Queries;
+namespace YandexSandbox.Bll.Commands;
 
-public class GetOrderByIdQueryResponse
+public class PlaceRentOrderCommandResponse
 {
     public required RentOrderModel Order { get; set; }
 }

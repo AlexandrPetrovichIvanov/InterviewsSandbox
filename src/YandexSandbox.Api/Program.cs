@@ -34,7 +34,7 @@ builder.Services.AddSingleton<InMemoryMessageProducer>();
 builder.Services.AddScoped<IMessageProducer, OutboxMessageProducerDecorator>();
 builder.Services.AddSingleton<IMessageConsumer, InMemoryMessageConsumer>();
 builder.Services.AddHostedService<OutboxDispatcherService>();
-builder.Services.AddHostedService<OrderConsumerService>();
+builder.Services.AddHostedService<RentOrderConsumerService>();
 
 var app = builder.Build();
 

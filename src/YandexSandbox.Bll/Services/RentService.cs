@@ -25,7 +25,7 @@ public class RentService : IRentService
         _messageProducer = messageProducer;
     }
 
-    public async Task<PlaceOrderCommandResponse> PlaceOrderAsync(PlaceOrderCommand command, CancellationToken cancellationToken = default)
+    public async Task<PlaceRentOrderCommandResponse> PlaceRentOrderAsync(PlaceRentOrderCommand command, CancellationToken cancellationToken = default)
     {
         var car = await _carRepository.GetByIdAsync(command.CarId, cancellationToken);
         if (car is null)
@@ -38,31 +38,31 @@ public class RentService : IRentService
         var model = new RentOrderModel { CarId = command.CarId };
         var created = await _orderRepository.CreateAsync(model, cancellationToken);
 
-        await _messageProducer.ProduceAsync(new OrderPlacedMessage
+        await _messageProducer.ProduceAsync(new RentOrderPlacedMessage
         {
             OrderId = created.Id,
             CarId = created.CarId,
             CreatedAt = created.CreatedAt
         }, cancellationToken);
 
-        return new PlaceOrderCommandResponse { Order = created };
+        return new PlaceRentOrderCommandResponse { Order = created };
     }
 
-    public async Task<GetOrderByIdQueryResponse?> CheckOrderAsync(GetOrderByIdQuery query, CancellationToken cancellationToken = default)
+    public async Task<GetRentOrderByIdQueryResponse?> CheckRentOrderAsync(GetRentOrderByIdQuery query, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(query.Id, cancellationToken);
-        return order is null ? null : new GetOrderByIdQueryResponse { Order = order };
+        return order is null ? null : new GetRentOrderByIdQueryResponse { Order = order };
     }
 
-    public async Task<ProcessOrderCommandResponse> ProcessOrderAsync(ProcessOrderCommand command, CancellationToken cancellationToken = default)
+    public async Task<ProcessRentOrderCommandResponse> ProcessRentOrderAsync(ProcessRentOrderCommand command, CancellationToken cancellationToken = default)
     {
         var order = await _orderRepository.GetByIdAsync(command.OrderId, cancellationToken);
         if (order is null)
-            throw new OrderNotFoundException(command.OrderId);
+            throw new RentOrderNotFoundException(command.OrderId);
 
         order.Processed = true;
         await _orderRepository.UpdateAsync(order, cancellationToken);
 
-        return new ProcessOrderCommandResponse { Order = order };
+        return new ProcessRentOrderCommandResponse { Order = order };
     }
 }

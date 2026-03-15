@@ -1,6 +1,6 @@
 namespace YandexSandbox.Bll.Queries;
 
-public class GetOrderByIdQuery
+public class GetRentOrderByIdQuery
 {
     public int Id { get; set; }
 }

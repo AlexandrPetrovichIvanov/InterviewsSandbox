@@ -10,7 +10,7 @@ namespace YandexSandbox.Tests.Integration.Rent;
 public class RentE2eTests
 {
     [Fact]
-    public async Task FullRentFlow_PlaceOrder_WaitForProcessing_OrderIsProcessed()
+    public async Task FullRentOrderFlow_PlaceOrder_WaitForProcessing_OrderIsProcessed()
     {
         var factory = new WebApplicationFactory<Program>();
         var client = factory.CreateClient();
@@ -22,8 +22,8 @@ public class RentE2eTests
         var carResponse = await client.PostAsJsonAsync("/api/cars", carRequest);
         var car = await carResponse.Content.ReadFromJsonAsync<CarApiResponse>();
 
-        var orderResponse = await client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car!.Id });
+        var orderResponse = await client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car!.Id });
         orderResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await orderResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>();
         order!.Processed.Should().BeFalse();
@@ -32,7 +32,7 @@ public class RentE2eTests
         for (var i = 0; i < 20; i++)
         {
             await Task.Delay(500);
-            var checkResponse = await client.GetAsync($"/api/rent/orders/{order.Id}");
+            var checkResponse = await client.GetAsync($"/api/rentorders/{order.Id}");
             processedOrder = await checkResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>();
             if (processedOrder!.Processed)
                 break;

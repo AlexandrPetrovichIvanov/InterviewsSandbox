@@ -40,12 +40,12 @@ public class RentControllerTests
     }
 
     [Fact]
-    public async Task PlaceOrder_WithValidCarId_ReturnsCreated()
+    public async Task PlaceRentOrder_WithValidCarId_ReturnsCreated()
     {
         var car = await CreateCarAsync();
 
-        var response = await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car.Id });
+        var response = await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car.Id });
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await response.Content.ReadFromJsonAsync<RentOrderApiResponse>();
@@ -55,10 +55,10 @@ public class RentControllerTests
     }
 
     [Fact]
-    public async Task PlaceOrder_WhenCarNotFound_Returns422()
+    public async Task PlaceRentOrder_WhenCarNotFound_Returns422()
     {
-        var response = await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = 99999 });
+        var response = await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = 99999 });
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -66,14 +66,14 @@ public class RentControllerTests
     }
 
     [Fact]
-    public async Task PlaceOrder_WhenCarAlreadyRented_Returns422()
+    public async Task PlaceRentOrder_WhenCarAlreadyRented_Returns422()
     {
         var car = await CreateCarAsync();
-        await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car.Id });
+        await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car.Id });
 
-        var response = await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car.Id });
+        var response = await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car.Id });
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
         var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -81,23 +81,23 @@ public class RentControllerTests
     }
 
     [Fact]
-    public async Task PlaceOrder_WithInvalidCarId_Returns400()
+    public async Task PlaceRentOrder_WithInvalidCarId_Returns400()
     {
-        var response = await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = 0 });
+        var response = await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = 0 });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task CheckOrder_WhenOrderExists_ReturnsOrder()
+    public async Task CheckRentOrder_WhenOrderExists_ReturnsOrder()
     {
         var car = await CreateCarAsync();
-        var placeResponse = await _client.PostAsJsonAsync("/api/rent/orders",
-            new PlaceOrderApiRequest { CarId = car.Id });
+        var placeResponse = await _client.PostAsJsonAsync("/api/rentorders",
+            new PlaceRentOrderApiRequest { CarId = car.Id });
         var placed = (await placeResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>())!;
 
-        var response = await _client.GetAsync($"/api/rent/orders/{placed.Id}");
+        var response = await _client.GetAsync($"/api/rentorders/{placed.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var order = await response.Content.ReadFromJsonAsync<RentOrderApiResponse>();
@@ -106,9 +106,9 @@ public class RentControllerTests
     }
 
     [Fact]
-    public async Task CheckOrder_WhenOrderNotFound_Returns404()
+    public async Task CheckRentOrder_WhenOrderNotFound_Returns404()
     {
-        var response = await _client.GetAsync("/api/rent/orders/99999");
+        var response = await _client.GetAsync("/api/rentorders/99999");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }

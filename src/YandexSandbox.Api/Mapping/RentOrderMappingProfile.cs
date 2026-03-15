@@ -6,11 +6,11 @@ using YandexSandbox.Bll.Models;
 
 namespace YandexSandbox.Api.Mapping;
 
-public class RentMappingProfile : Profile
+public class RentOrderMappingProfile : Profile
 {
-    public RentMappingProfile()
+    public RentOrderMappingProfile()
     {
-        CreateMap<PlaceOrderApiRequest, PlaceOrderCommand>();
+        CreateMap<PlaceRentOrderApiRequest, PlaceRentOrderCommand>();
         CreateMap<RentOrderModel, RentOrderApiResponse>();
     }
 }
