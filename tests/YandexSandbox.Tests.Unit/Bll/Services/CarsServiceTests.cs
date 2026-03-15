@@ -11,7 +11,7 @@ using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Services;
 
-namespace YandexSandbox.Tests.Unit.Services;
+namespace YandexSandbox.Tests.Unit.Bll.Services;
 
 public class CarsServiceTests
 {

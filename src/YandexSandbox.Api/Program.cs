@@ -4,6 +4,7 @@ using YandexSandbox.Api;
 using YandexSandbox.Api.Mapping;
 using YandexSandbox.Api.Messaging;
 using YandexSandbox.Api.Messaging.Produce;
+using YandexSandbox.Api.Services;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Handlers;
 using YandexSandbox.Bll.Interfaces.Messaging.Handlers;
@@ -30,6 +31,7 @@ builder.Services.Configure<TopicSettings>(
 
 builder.Services.AddSingleton<ICarRepository, InMemoryCarRepository>();
 builder.Services.AddSingleton<IRentOrderRepository, InMemoryRentOrderRepository>();
+builder.Services.AddSingleton<ILock, InMemoryLock>();
 builder.Services.AddScoped<ICarsService, CarsService>();
 builder.Services.AddScoped<IRentOrdersService, RentOrdersService>();
 builder.Services.AddScoped<IRentOrderProcessedMessageHandler, RentOrderProcessedMessageHandler>();

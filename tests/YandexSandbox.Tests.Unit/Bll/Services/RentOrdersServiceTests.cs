@@ -7,9 +7,10 @@ using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
+using YandexSandbox.Bll.Interfaces.Services;
 using YandexSandbox.Bll.Services;
 
-namespace YandexSandbox.Tests.Unit.Services;
+namespace YandexSandbox.Tests.Unit.Bll.Services;
 
 public class RentOrdersServiceTests
 {
@@ -23,7 +24,10 @@ public class RentOrdersServiceTests
         _orderRepositoryMock = new Mock<IRentOrderRepository>();
         _carRepositoryMock = new Mock<ICarRepository>();
         _messageProducerMock = new Mock<IMessageProducer<RentOrderPlacedMessage>>();
-        _sut = new RentOrdersService(_orderRepositoryMock.Object, _carRepositoryMock.Object, _messageProducerMock.Object);
+        var lockMock = new Mock<ILock>();
+        lockMock.Setup(l => l.AcquireAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Mock.Of<IAsyncDisposable>());
+        _sut = new RentOrdersService(_orderRepositoryMock.Object, _carRepositoryMock.Object, _messageProducerMock.Object, lockMock.Object);
     }
 
     private static CarModel CreateCar(int id = 1) =>
