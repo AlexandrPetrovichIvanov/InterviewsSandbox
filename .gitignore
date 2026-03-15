@@ -36,3 +36,4 @@ TestResults/
 coverage*/
 /.claude/settings.local.json
 /src/YandexSandbox.Api/Properties/launchSettings.json
+/CLAUDE.md

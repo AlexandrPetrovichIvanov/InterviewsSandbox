@@ -2,9 +2,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
-using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.Interfaces;
-using YandexSandbox.Bll.Queries;
+using YandexSandbox.Bll.Interfaces.Commands;
+using YandexSandbox.Bll.Interfaces.Services;
+using YandexSandbox.Bll.Interfaces.Queries;
 
 namespace YandexSandbox.Api.Controllers;
 
@@ -12,10 +12,10 @@ namespace YandexSandbox.Api.Controllers;
 [Route("api/[controller]")]
 public class CarsController : ControllerBase
 {
-    private readonly ICarService _carService;
+    private readonly ICarsService _carService;
     private readonly IMapper _mapper;
 
-    public CarsController(ICarService carService, IMapper mapper)
+    public CarsController(ICarsService carService, IMapper mapper)
     {
         _carService = carService;
         _mapper = mapper;

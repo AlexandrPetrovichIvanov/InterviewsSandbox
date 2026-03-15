@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\YandexSandbox.Bll.Interfaces\YandexSandbox.Bll.Interfaces.csproj" />
-  </ItemGroup>
-
 </Project>
