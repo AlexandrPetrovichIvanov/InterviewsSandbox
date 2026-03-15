@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
 using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.CommonModels;
+using YandexSandbox.Bll.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Messaging;

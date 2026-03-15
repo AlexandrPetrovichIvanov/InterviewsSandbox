@@ -1,4 +1,4 @@
-using YandexSandbox.Bll.CommonModels;
+using YandexSandbox.Bll.Models;
 
 namespace YandexSandbox.Bll.Queries;
 

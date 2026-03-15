@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Moq;
 using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.CommonModels;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Messaging;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Messaging;
+using YandexSandbox.Bll.Models;
 using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
 
@@ -108,7 +108,7 @@ public class RentServiceTests
     }
 
     [Fact]
-    public async Task ProcessOrderAsync_WhenOrderExists_SetsProcessedTrue()
+    public async Task ProcessOrderAsync_WhenOrderExists_SetsProcessed()
     {
         var order = new RentOrderModel { Id = 1, CarId = 5, Processed = false };
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))

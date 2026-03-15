@@ -1,4 +1,4 @@
-namespace YandexSandbox.Bll.CommonModels;
+namespace YandexSandbox.Bll.Models;
 
 public class CarModel
 {

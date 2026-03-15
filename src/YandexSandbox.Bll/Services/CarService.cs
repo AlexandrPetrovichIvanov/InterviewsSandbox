@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.CommonModels;
+using YandexSandbox.Bll.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Messaging;
