@@ -33,11 +33,9 @@ builder.Services.AddScoped<IRentOrdersService, RentOrdersService>();
 builder.Services.AddScoped<IRentOrderProcessedMessageHandler, RentOrderProcessedMessageHandler>();
 
 builder.Services.AddSingleton<InMemoryOutboxStorage>();
-builder.Services.AddSingleton<InMemoryMessageProducer>();
 builder.Services.AddScoped<ICarCreatedMessageProducer, CarCreatedMessageProducerAdapter>();
 builder.Services.AddScoped<IRentOrderPlacedMessageProducer, RentOrderPlacedMessageProducerAdapter>();
 builder.Services.AddSingleton<IRentOrderProcessingConsumer, RentOrderProcessingConsumerAdapter>();
-builder.Services.AddHostedService<OutboxDispatcherHostedService>();
 builder.Services.AddHostedService<RentOrderConsumerHostedService>();
 
 var app = builder.Build();
