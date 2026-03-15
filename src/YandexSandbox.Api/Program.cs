@@ -25,16 +25,16 @@ builder.Services.Configure<TopicSettings>(
 
 builder.Services.AddSingleton<ICarRepository, InMemoryCarRepository>();
 builder.Services.AddSingleton<IRentOrderRepository, InMemoryRentOrderRepository>();
-builder.Services.AddScoped<ICarService, CarService>();
-builder.Services.AddScoped<IRentService, RentService>();
+builder.Services.AddScoped<ICarsService, CarsService>();
+builder.Services.AddScoped<IRentOrdersService, RentOrdersService>();
 
 builder.Services.AddSingleton<InMemoryMessageBus>();
 builder.Services.AddSingleton<InMemoryOutboxStorage>();
 builder.Services.AddSingleton<InMemoryMessageProducer>();
 builder.Services.AddScoped<IMessageProducer, OutboxMessageProducerDecorator>();
 builder.Services.AddSingleton<IMessageConsumer, InMemoryMessageConsumer>();
-builder.Services.AddHostedService<OutboxDispatcherService>();
-builder.Services.AddHostedService<RentOrderConsumerService>();
+builder.Services.AddHostedService<OutboxDispatcherHostedService>();
+builder.Services.AddHostedService<RentOrderConsumerHostedService>();
 
 var app = builder.Build();
 

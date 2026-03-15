@@ -11,13 +11,13 @@ using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Services;
 
-public class CarService : ICarService
+public class CarsService : ICarsService
 {
     private readonly ICarRepository _repository;
     private readonly IMessageProducer _messageProducer;
     private readonly CarValidationSettings _settings;
 
-    public CarService(
+    public CarsService(
         ICarRepository repository,
         IMessageProducer messageProducer,
         IOptions<CarValidationSettings> settings)

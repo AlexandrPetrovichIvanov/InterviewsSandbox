@@ -3,7 +3,7 @@ using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Interfaces.Services;
 
-public interface IRentService
+public interface IRentOrdersService
 {
     Task<PlaceRentOrderCommandResponse> PlaceRentOrderAsync(PlaceRentOrderCommand command, CancellationToken cancellationToken = default);
     Task<GetRentOrderByIdQueryResponse?> CheckRentOrderAsync(GetRentOrderByIdQuery query, CancellationToken cancellationToken = default);

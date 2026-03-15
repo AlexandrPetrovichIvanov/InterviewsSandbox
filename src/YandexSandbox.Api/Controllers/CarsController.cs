@@ -12,10 +12,10 @@ namespace YandexSandbox.Api.Controllers;
 [Route("api/[controller]")]
 public class CarsController : ControllerBase
 {
-    private readonly ICarService _carService;
+    private readonly ICarsService _carService;
     private readonly IMapper _mapper;
 
-    public CarsController(ICarService carService, IMapper mapper)
+    public CarsController(ICarsService carService, IMapper mapper)
     {
         _carService = carService;
         _mapper = mapper;

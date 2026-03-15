@@ -3,7 +3,7 @@ using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Interfaces.Services;
 
-public interface ICarService
+public interface ICarsService
 {
     Task<GetCarByIdQueryResponse?> GetByIdAsync(GetCarByIdQuery query, CancellationToken cancellationToken = default);
     Task<GetAllCarsQueryResponse> GetAllAsync(GetAllCarsQuery query, CancellationToken cancellationToken = default);

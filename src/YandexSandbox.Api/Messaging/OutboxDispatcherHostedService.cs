@@ -1,16 +1,16 @@
 namespace YandexSandbox.Api.Messaging;
 
-public class OutboxDispatcherService : BackgroundService
+public class OutboxDispatcherHostedService : BackgroundService
 {
     private readonly InMemoryOutboxStorage _storage;
     private readonly InMemoryMessageProducer _producer;
-    private readonly ILogger<OutboxDispatcherService> _logger;
+    private readonly ILogger<OutboxDispatcherHostedService> _logger;
     private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
 
-    public OutboxDispatcherService(
+    public OutboxDispatcherHostedService(
         InMemoryOutboxStorage storage,
         InMemoryMessageProducer producer,
-        ILogger<OutboxDispatcherService> logger)
+        ILogger<OutboxDispatcherHostedService> logger)
     {
         _storage = storage;
         _producer = producer;

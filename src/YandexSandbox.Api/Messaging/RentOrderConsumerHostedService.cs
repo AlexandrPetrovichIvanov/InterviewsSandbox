@@ -5,19 +5,19 @@ using YandexSandbox.Bll.Messaging;
 
 namespace YandexSandbox.Api.Messaging;
 
-public class RentOrderConsumerService : BackgroundService
+public class RentOrderConsumerHostedService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly InMemoryMessageBus _bus;
     private readonly string _topic;
-    private readonly ILogger<RentOrderConsumerService> _logger;
+    private readonly ILogger<RentOrderConsumerHostedService> _logger;
     private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1);
 
-    public RentOrderConsumerService(
+    public RentOrderConsumerHostedService(
         IServiceScopeFactory scopeFactory,
         InMemoryMessageBus bus,
         IOptions<TopicSettings> topicSettings,
-        ILogger<RentOrderConsumerService> logger)
+        ILogger<RentOrderConsumerHostedService> logger)
     {
         _scopeFactory = scopeFactory;
         _bus = bus;
@@ -35,7 +35,7 @@ public class RentOrderConsumerService : BackgroundService
                 try
                 {
                     using var scope = _scopeFactory.CreateScope();
-                    var rentService = scope.ServiceProvider.GetRequiredService<IRentService>();
+                    var rentService = scope.ServiceProvider.GetRequiredService<IRentOrdersService>();
                     await rentService.ProcessRentOrderAsync(
                         new ProcessRentOrderCommand { OrderId = orderMsg.OrderId },
                         stoppingToken);

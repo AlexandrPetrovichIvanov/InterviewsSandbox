@@ -9,13 +9,13 @@ using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Services;
 
-public class RentService : IRentService
+public class RentOrdersService : IRentOrdersService
 {
     private readonly IRentOrderRepository _orderRepository;
     private readonly ICarRepository _carRepository;
     private readonly IMessageProducer _messageProducer;
 
-    public RentService(
+    public RentOrdersService(
         IRentOrderRepository orderRepository,
         ICarRepository carRepository,
         IMessageProducer messageProducer)

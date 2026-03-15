@@ -13,18 +13,18 @@ using YandexSandbox.Bll.Services;
 
 namespace YandexSandbox.Tests.Unit.Services;
 
-public class CarServiceTests
+public class CarsServiceTests
 {
     private readonly Mock<ICarRepository> _repositoryMock;
     private readonly Mock<IMessageProducer> _messageProducerMock;
-    private readonly CarService _sut;
+    private readonly CarsService _sut;
 
-    public CarServiceTests()
+    public CarsServiceTests()
     {
         _repositoryMock = new Mock<ICarRepository>();
         _messageProducerMock = new Mock<IMessageProducer>();
         var settings = Options.Create(new CarValidationSettings());
-        _sut = new CarService(_repositoryMock.Object, _messageProducerMock.Object, settings);
+        _sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class CarServiceTests
     public async Task CreateAsync_WithCustomMinYear_UsesConfiguredValue()
     {
         var settings = Options.Create(new CarValidationSettings { MinYear = 2000 });
-        var sut = new CarService(_repositoryMock.Object, _messageProducerMock.Object, settings);
+        var sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
         var command = new CreateCarCommand
         {
             Make = "Ford", Model = "T", Year = 1950, Color = "Black"
