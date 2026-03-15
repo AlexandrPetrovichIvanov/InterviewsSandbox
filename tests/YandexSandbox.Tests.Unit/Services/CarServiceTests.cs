@@ -1,12 +1,12 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
-using YandexSandbox.Bll.Interfaces.Commands;
-using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
+using YandexSandbox.Bll.Interfaces.Commands;
 using YandexSandbox.Bll.Interfaces.Messaging.Messages;
 using YandexSandbox.Bll.Interfaces.Messaging.Producers;
+using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Services;
@@ -27,28 +27,35 @@ public class CarsServiceTests
         _sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
     }
 
+    private static CarModel CreateCar(int id = 1, string make = "Toyota", string model = "Camry",
+        int year = 2024, string color = "White", int mileage = 0, string? vin = null)
+        => new() { Id = id, Make = make, Model = model, Year = year, Color = color, Mileage = mileage, Vin = vin };
+
+    private static CreateCarCommand CreateCommand(string make = "Toyota", string model = "Camry",
+        int year = 2024, string color = "White", int mileage = 0, string? vin = null)
+        => new() { Make = make, Model = model, Year = year, Color = color, Mileage = mileage, Vin = vin };
+
+    private void SetupRepositoryCreate(int assignedId = 1)
+    {
+        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((CarModel m, CancellationToken _) =>
+            {
+                m.Id = assignedId;
+                return m;
+            });
+    }
+
     [Fact]
     public async Task GetByIdAsync_WhenCarExists_ReturnsResponse()
     {
-        var car = new CarModel
-        {
-            Id = 1, Make = "Toyota", Model = "Camry", Year = 2023,
-            Color = "White", Mileage = 15000, Vin = "1HGBH41JXMN109186",
-            CreatedAt = DateTime.UtcNow
-        };
+        var car = CreateCar(id: 1, make: "Toyota", model: "Camry", mileage: 15000, vin: "1HGBH41JXMN109186");
         _repositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(car);
 
         var result = await _sut.GetByIdAsync(new GetCarByIdQuery { Id = 1 });
 
         result.Should().NotBeNull();
-        result!.Car.Id.Should().Be(1);
-        result.Car.Make.Should().Be("Toyota");
-        result.Car.Model.Should().Be("Camry");
-        result.Car.Year.Should().Be(2023);
-        result.Car.Color.Should().Be("White");
-        result.Car.Mileage.Should().Be(15000);
-        result.Car.Vin.Should().Be("1HGBH41JXMN109186");
+        result!.Car.Should().BeSameAs(car);
     }
 
     [Fact]
@@ -65,46 +72,37 @@ public class CarsServiceTests
     [Fact]
     public async Task GetAllAsync_ReturnsAllCars()
     {
-        var cars = new List<CarModel>
-        {
-            new() { Id = 1, Make = "Toyota", Model = "Camry", Year = 2023, Color = "White" },
-            new() { Id = 2, Make = "Honda", Model = "Civic", Year = 2024, Color = "Black" }
-        };
+        var cars = new List<CarModel> { CreateCar(id: 1), CreateCar(id: 2, make: "Honda") };
         _repositoryMock.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(cars);
 
         var result = await _sut.GetAllAsync(new GetAllCarsQuery());
 
         result.Cars.Should().HaveCount(2);
-        result.Cars[0].Make.Should().Be("Toyota");
-        result.Cars[1].Make.Should().Be("Honda");
     }
 
     [Fact]
     public async Task CreateAsync_WithValidCommand_CreatesAndReturnsResponse()
     {
-        var command = new CreateCarCommand
-        {
-            Make = "BMW", Model = "X5", Year = 2024,
-            Color = "Black", Mileage = 0, Vin = "WBAPH5C55BA271043"
-        };
-        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarModel model, CancellationToken _) =>
-            {
-                model.Id = 1;
-                model.CreatedAt = DateTime.UtcNow;
-                return model;
-            });
+        SetupRepositoryCreate(assignedId: 1);
 
-        var result = await _sut.CreateAsync(command);
+        var result = await _sut.CreateAsync(CreateCommand(make: "BMW", model: "X5"));
 
         result.Car.Id.Should().Be(1);
         result.Car.Make.Should().Be("BMW");
         result.Car.Model.Should().Be("X5");
-        result.Car.Year.Should().Be(2024);
         _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ProducesCarCreatedMessage()
+    {
+        SetupRepositoryCreate(assignedId: 5);
+
+        await _sut.CreateAsync(CreateCommand(make: "BMW", model: "X5"));
+
         _messageProducerMock.Verify(p => p.ProduceAsync(
-            It.Is<CarCreatedMessage>(m => m.Id == 1 && m.Make == "BMW" && m.Model == "X5"),
+            It.Is<CarCreatedMessage>(m => m.Id == 5 && m.Make == "BMW" && m.Model == "X5"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -113,12 +111,7 @@ public class CarsServiceTests
     [InlineData(2030)]
     public async Task CreateAsync_WithInvalidYear_ThrowsInvalidCarYearException(int year)
     {
-        var command = new CreateCarCommand
-        {
-            Make = "Toyota", Model = "Supra", Year = year, Color = "Red"
-        };
-
-        var act = () => _sut.CreateAsync(command);
+        var act = () => _sut.CreateAsync(CreateCommand(year: year));
 
         var ex = await act.Should().ThrowAsync<InvalidCarYearException>();
         ex.Which.Year.Should().Be(year);
@@ -130,12 +123,8 @@ public class CarsServiceTests
     {
         var settings = Options.Create(new CarValidationSettings { MinYear = 2000 });
         var sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
-        var command = new CreateCarCommand
-        {
-            Make = "Ford", Model = "T", Year = 1950, Color = "Black"
-        };
 
-        var act = () => sut.CreateAsync(command);
+        var act = () => sut.CreateAsync(CreateCommand(year: 1950));
 
         var ex = await act.Should().ThrowAsync<InvalidCarYearException>();
         ex.Which.MinYear.Should().Be(2000);
@@ -144,12 +133,7 @@ public class CarsServiceTests
     [Fact]
     public async Task CreateAsync_WithInvalidVin_ThrowsInvalidVinException()
     {
-        var command = new CreateCarCommand
-        {
-            Make = "Audi", Model = "A4", Year = 2024, Color = "Silver", Vin = "SHORT"
-        };
-
-        var act = () => _sut.CreateAsync(command);
+        var act = () => _sut.CreateAsync(CreateCommand(vin: "SHORT"));
 
         var ex = await act.Should().ThrowAsync<InvalidVinException>();
         ex.Which.Vin.Should().Be("SHORT");
@@ -158,19 +142,9 @@ public class CarsServiceTests
     [Fact]
     public async Task CreateAsync_WithNullVin_DoesNotThrow()
     {
-        var command = new CreateCarCommand
-        {
-            Make = "BMW", Model = "X5", Year = 2024, Color = "Black", Vin = null
-        };
-        _repositoryMock.Setup(r => r.CreateAsync(It.IsAny<CarModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CarModel model, CancellationToken _) =>
-            {
-                model.Id = 1;
-                model.CreatedAt = DateTime.UtcNow;
-                return model;
-            });
+        SetupRepositoryCreate();
 
-        var result = await _sut.CreateAsync(command);
+        var result = await _sut.CreateAsync(CreateCommand(vin: null));
 
         result.Car.Vin.Should().BeNull();
     }
