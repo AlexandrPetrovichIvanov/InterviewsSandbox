@@ -1,4 +1,4 @@
-namespace YandexSandbox.Bll.Interfaces.Messaging;
+namespace YandexSandbox.Bll.Interfaces.Messaging.Messages;
 
 public class RentOrderPlacedMessage
 {

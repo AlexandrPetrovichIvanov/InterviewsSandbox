@@ -2,13 +2,14 @@ using FluentValidation;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using YandexSandbox.Api;
 using YandexSandbox.Api.Messaging;
-using YandexSandbox.Api.Messaging.Consume;
 using YandexSandbox.Api.Messaging.Produce;
 using YandexSandbox.Bll.Configuration;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
+using YandexSandbox.Bll.Handlers;
+using YandexSandbox.Bll.Interfaces.Messaging.Handlers;
+using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Interfaces.Services;
-using YandexSandbox.Bll.Handlers;
 using YandexSandbox.Bll.Services;
 using YandexSandbox.Dal.Repositories;
 
@@ -33,10 +34,8 @@ builder.Services.AddScoped<IRentOrdersService, RentOrdersService>();
 builder.Services.AddScoped<IRentOrderProcessedMessageHandler, RentOrderProcessedMessageHandler>();
 
 builder.Services.AddSingleton<InMemoryOutboxStorage>();
-builder.Services.AddScoped<ICarCreatedMessageProducer, CarCreatedMessageProducerAdapter>();
-builder.Services.AddScoped<IRentOrderPlacedMessageProducer, RentOrderPlacedMessageProducerAdapter>();
-builder.Services.AddSingleton<IRentOrderProcessingConsumer, RentOrderProcessingConsumerAdapter>();
-builder.Services.AddHostedService<RentOrderConsumerHostedService>();
+builder.Services.AddScoped<IMessageProducer<CarCreatedMessage>, OutboxMessageProducerAdapter<CarCreatedMessage>>();
+builder.Services.AddScoped<IMessageProducer<RentOrderPlacedMessage>, OutboxMessageProducerAdapter<RentOrderPlacedMessage>>();
 
 var app = builder.Build();
 

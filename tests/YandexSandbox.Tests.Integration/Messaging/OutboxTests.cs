@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using YandexSandbox.Api.Messaging;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
 
 namespace YandexSandbox.Tests.Integration.Messaging;
 

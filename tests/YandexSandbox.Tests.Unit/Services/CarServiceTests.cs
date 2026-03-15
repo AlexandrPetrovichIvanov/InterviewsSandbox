@@ -5,7 +5,8 @@ using YandexSandbox.Bll.Interfaces.Commands;
 using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
+using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Services;
@@ -15,13 +16,13 @@ namespace YandexSandbox.Tests.Unit.Services;
 public class CarsServiceTests
 {
     private readonly Mock<ICarRepository> _repositoryMock;
-    private readonly Mock<ICarCreatedMessageProducer> _messageProducerMock;
+    private readonly Mock<IMessageProducer<CarCreatedMessage>> _messageProducerMock;
     private readonly CarsService _sut;
 
     public CarsServiceTests()
     {
         _repositoryMock = new Mock<ICarRepository>();
-        _messageProducerMock = new Mock<ICarCreatedMessageProducer>();
+        _messageProducerMock = new Mock<IMessageProducer<CarCreatedMessage>>();
         var settings = Options.Create(new CarValidationSettings());
         _sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
     }
