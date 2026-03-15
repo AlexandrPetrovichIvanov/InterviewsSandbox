@@ -1,14 +1,13 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
-using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Interfaces.Commands;
+using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
-using YandexSandbox.Bll.Messaging;
-using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
 
 namespace YandexSandbox.Tests.Unit.Services;
@@ -16,13 +15,13 @@ namespace YandexSandbox.Tests.Unit.Services;
 public class CarsServiceTests
 {
     private readonly Mock<ICarRepository> _repositoryMock;
-    private readonly Mock<IMessageProducer> _messageProducerMock;
+    private readonly Mock<ICarCreatedMessageProducer> _messageProducerMock;
     private readonly CarsService _sut;
 
     public CarsServiceTests()
     {
         _repositoryMock = new Mock<ICarRepository>();
-        _messageProducerMock = new Mock<IMessageProducer>();
+        _messageProducerMock = new Mock<ICarCreatedMessageProducer>();
         var settings = Options.Create(new CarValidationSettings());
         _sut = new CarsService(_repositoryMock.Object, _messageProducerMock.Object, settings);
     }

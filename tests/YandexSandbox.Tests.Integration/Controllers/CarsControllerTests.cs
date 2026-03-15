@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using YandexSandbox.Api.Messaging;
-using YandexSandbox.Bll.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
 

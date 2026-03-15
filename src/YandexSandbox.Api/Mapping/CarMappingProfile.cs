@@ -1,8 +1,8 @@
 using AutoMapper;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
-using YandexSandbox.Bll.Commands;
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Interfaces.Commands;
+using YandexSandbox.Bll.Interfaces.Models;
 
 namespace YandexSandbox.Api.Mapping;
 

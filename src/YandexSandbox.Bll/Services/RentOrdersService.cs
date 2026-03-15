@@ -1,11 +1,10 @@
-using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.Exceptions;
+using YandexSandbox.Bll.Interfaces.Commands;
 using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Models;
+using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Interfaces.Services;
-using YandexSandbox.Bll.Messaging;
-using YandexSandbox.Bll.Models;
-using YandexSandbox.Bll.Queries;
 
 namespace YandexSandbox.Bll.Services;
 
@@ -13,12 +12,12 @@ public class RentOrdersService : IRentOrdersService
 {
     private readonly IRentOrderRepository _orderRepository;
     private readonly ICarRepository _carRepository;
-    private readonly IMessageProducer _messageProducer;
+    private readonly IRentOrderPlacedMessageProducer _messageProducer;
 
     public RentOrdersService(
         IRentOrderRepository orderRepository,
         ICarRepository carRepository,
-        IMessageProducer messageProducer)
+        IRentOrderPlacedMessageProducer messageProducer)
     {
         _orderRepository = orderRepository;
         _carRepository = carRepository;

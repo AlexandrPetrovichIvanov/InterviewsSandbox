@@ -2,9 +2,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using YandexSandbox.Api.Requests;
 using YandexSandbox.Api.Responses;
-using YandexSandbox.Bll.Commands;
+using YandexSandbox.Bll.Interfaces.Commands;
 using YandexSandbox.Bll.Interfaces.Services;
-using YandexSandbox.Bll.Queries;
+using YandexSandbox.Bll.Interfaces.Queries;
 
 namespace YandexSandbox.Api.Controllers;
 

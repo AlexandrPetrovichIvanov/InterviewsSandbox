@@ -1,12 +1,11 @@
 using FluentAssertions;
 using Moq;
-using YandexSandbox.Bll.Commands;
 using YandexSandbox.Bll.Exceptions;
+using YandexSandbox.Bll.Interfaces.Commands;
 using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Models;
+using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
-using YandexSandbox.Bll.Messaging;
-using YandexSandbox.Bll.Models;
-using YandexSandbox.Bll.Queries;
 using YandexSandbox.Bll.Services;
 
 namespace YandexSandbox.Tests.Unit.Services;
@@ -15,14 +14,14 @@ public class RentOrdersServiceTests
 {
     private readonly Mock<IRentOrderRepository> _orderRepositoryMock;
     private readonly Mock<ICarRepository> _carRepositoryMock;
-    private readonly Mock<IMessageProducer> _messageProducerMock;
+    private readonly Mock<IRentOrderPlacedMessageProducer> _messageProducerMock;
     private readonly RentOrdersService _sut;
 
     public RentOrdersServiceTests()
     {
         _orderRepositoryMock = new Mock<IRentOrderRepository>();
         _carRepositoryMock = new Mock<ICarRepository>();
-        _messageProducerMock = new Mock<IMessageProducer>();
+        _messageProducerMock = new Mock<IRentOrderPlacedMessageProducer>();
         _sut = new RentOrdersService(_orderRepositoryMock.Object, _carRepositoryMock.Object, _messageProducerMock.Object);
     }
 

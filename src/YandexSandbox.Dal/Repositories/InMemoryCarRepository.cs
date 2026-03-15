@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using YandexSandbox.Bll.Models;
+using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Repositories;
 
 namespace YandexSandbox.Dal.Repositories;
