@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Options;
-using YandexSandbox.Bll.Interfaces.Commands;
-using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Configuration;
 using YandexSandbox.Bll.Exceptions;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Commands;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
+using YandexSandbox.Bll.Interfaces.Messaging.Producers;
+using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
 using YandexSandbox.Bll.Interfaces.Services;
@@ -13,12 +14,12 @@ namespace YandexSandbox.Bll.Services;
 public class CarsService : ICarsService
 {
     private readonly ICarRepository _repository;
-    private readonly ICarCreatedMessageProducer _messageProducer;
+    private readonly IMessageProducer<CarCreatedMessage> _messageProducer;
     private readonly CarValidationSettings _settings;
 
     public CarsService(
         ICarRepository repository,
-        ICarCreatedMessageProducer messageProducer,
+        IMessageProducer<CarCreatedMessage> messageProducer,
         IOptions<CarValidationSettings> settings)
     {
         _repository = repository;

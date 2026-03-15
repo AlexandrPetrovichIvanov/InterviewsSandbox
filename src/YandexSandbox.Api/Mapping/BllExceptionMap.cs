@@ -52,6 +52,21 @@ public static class BllExceptionMap
         }
     };
 
+    public static void ValidateAllExceptionsMapped()
+    {
+        var bllExceptionTypes = typeof(BllException).Assembly
+            .GetTypes()
+            .Where(t => t is { IsAbstract: false, IsClass: true } && t.IsSubclassOf(typeof(BllException)));
+
+        var unmapped = bllExceptionTypes
+            .Where(t => !HttpStatusCodes.ContainsKey(t) || !MessageFormatters.ContainsKey(t))
+            .ToList();
+
+        if (unmapped.Count > 0)
+            throw new InvalidOperationException(
+                $"Unmapped BllException subclasses: {string.Join(", ", unmapped.Select(t => t.Name))}");
+    }
+
     public static bool TryMap(BllException ex, out int statusCode, out string message)
     {
         var type = ex.GetType();

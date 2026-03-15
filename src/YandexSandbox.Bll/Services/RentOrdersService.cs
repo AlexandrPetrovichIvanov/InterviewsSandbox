@@ -1,6 +1,7 @@
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Commands;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
+using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
@@ -12,12 +13,12 @@ public class RentOrdersService : IRentOrdersService
 {
     private readonly IRentOrderRepository _orderRepository;
     private readonly ICarRepository _carRepository;
-    private readonly IRentOrderPlacedMessageProducer _messageProducer;
+    private readonly IMessageProducer<RentOrderPlacedMessage> _messageProducer;
 
     public RentOrdersService(
         IRentOrderRepository orderRepository,
         ICarRepository carRepository,
-        IRentOrderPlacedMessageProducer messageProducer)
+        IMessageProducer<RentOrderPlacedMessage> messageProducer)
     {
         _orderRepository = orderRepository;
         _carRepository = carRepository;
@@ -59,9 +60,15 @@ public class RentOrdersService : IRentOrdersService
         if (order is null)
             throw new RentOrderNotFoundException(command.OrderId);
 
-        order.Processed = true;
-        await _orderRepository.UpdateAsync(order, cancellationToken);
+        var updated = new RentOrderModel
+        {
+            Id = order.Id,
+            CarId = order.CarId,
+            Processed = true,
+            CreatedAt = order.CreatedAt
+        };
+        await _orderRepository.UpdateAsync(updated, cancellationToken);
 
-        return new ProcessRentOrderCommandResponse { Order = order };
+        return new ProcessRentOrderCommandResponse { Order = updated };
     }
 }

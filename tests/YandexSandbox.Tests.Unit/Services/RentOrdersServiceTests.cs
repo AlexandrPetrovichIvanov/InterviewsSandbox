@@ -2,7 +2,8 @@ using FluentAssertions;
 using Moq;
 using YandexSandbox.Bll.Exceptions;
 using YandexSandbox.Bll.Interfaces.Commands;
-using YandexSandbox.Bll.Interfaces.Messaging;
+using YandexSandbox.Bll.Interfaces.Messaging.Messages;
+using YandexSandbox.Bll.Interfaces.Messaging.Producers;
 using YandexSandbox.Bll.Interfaces.Models;
 using YandexSandbox.Bll.Interfaces.Queries;
 using YandexSandbox.Bll.Interfaces.Repositories;
@@ -14,31 +15,50 @@ public class RentOrdersServiceTests
 {
     private readonly Mock<IRentOrderRepository> _orderRepositoryMock;
     private readonly Mock<ICarRepository> _carRepositoryMock;
-    private readonly Mock<IRentOrderPlacedMessageProducer> _messageProducerMock;
+    private readonly Mock<IMessageProducer<RentOrderPlacedMessage>> _messageProducerMock;
     private readonly RentOrdersService _sut;
 
     public RentOrdersServiceTests()
     {
         _orderRepositoryMock = new Mock<IRentOrderRepository>();
         _carRepositoryMock = new Mock<ICarRepository>();
-        _messageProducerMock = new Mock<IRentOrderPlacedMessageProducer>();
+        _messageProducerMock = new Mock<IMessageProducer<RentOrderPlacedMessage>>();
         _sut = new RentOrdersService(_orderRepositoryMock.Object, _carRepositoryMock.Object, _messageProducerMock.Object);
     }
 
-    [Fact]
-    public async Task PlaceRentOrderAsync_WhenCarExistsAndFree_CreatesOrderAndProducesMessage()
+    private static CarModel CreateCar(int id = 1) =>
+        new() { Id = id, Make = "Toyota", Model = "Camry", Year = 2024, Color = "White" };
+
+    private static RentOrderModel CreateOrder(int id = 1, int carId = 1, bool processed = false) =>
+        new() { Id = id, CarId = carId, Processed = processed };
+
+    private void SetupCarExists(int carId = 1)
     {
-        _carRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CarModel { Id = 1, Make = "BMW", Model = "X5", Year = 2024, Color = "Black" });
-        _orderRepositoryMock.Setup(r => r.GetActiveByCarIdAsync(1, It.IsAny<CancellationToken>()))
+        _carRepositoryMock.Setup(r => r.GetByIdAsync(carId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(CreateCar(carId));
+    }
+
+    private void SetupCarFree(int carId = 1)
+    {
+        _orderRepositoryMock.Setup(r => r.GetActiveByCarIdAsync(carId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((RentOrderModel?)null);
+    }
+
+    private void SetupOrderCreate(int assignedId = 10)
+    {
         _orderRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<RentOrderModel>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((RentOrderModel model, CancellationToken _) =>
+            .ReturnsAsync((RentOrderModel m, CancellationToken _) => new RentOrderModel
             {
-                model.Id = 10;
-                model.CreatedAt = DateTime.UtcNow;
-                return model;
+                Id = assignedId, CarId = m.CarId, Processed = m.Processed
             });
+    }
+
+    [Fact]
+    public async Task PlaceRentOrderAsync_WhenCarExistsAndFree_CreatesOrder()
+    {
+        SetupCarExists();
+        SetupCarFree();
+        SetupOrderCreate(assignedId: 10);
 
         var result = await _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 1 });
 
@@ -46,6 +66,17 @@ public class RentOrdersServiceTests
         result.Order.CarId.Should().Be(1);
         result.Order.Processed.Should().BeFalse();
         _orderRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<RentOrderModel>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task PlaceRentOrderAsync_ProducesRentOrderPlacedMessage()
+    {
+        SetupCarExists();
+        SetupCarFree();
+        SetupOrderCreate(assignedId: 10);
+
+        await _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 1 });
+
         _messageProducerMock.Verify(p => p.ProduceAsync(
             It.Is<RentOrderPlacedMessage>(m => m.OrderId == 10 && m.CarId == 1),
             It.IsAny<CancellationToken>()), Times.Once);
@@ -66,10 +97,9 @@ public class RentOrdersServiceTests
     [Fact]
     public async Task PlaceRentOrderAsync_WhenCarNotFree_ThrowsCarNotAvailableException()
     {
-        _carRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new CarModel { Id = 1, Make = "BMW", Model = "X5", Year = 2024, Color = "Black" });
+        SetupCarExists();
         _orderRepositoryMock.Setup(r => r.GetActiveByCarIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new RentOrderModel { Id = 5, CarId = 1 });
+            .ReturnsAsync(CreateOrder(id: 5, carId: 1));
 
         var act = () => _sut.PlaceRentOrderAsync(new PlaceRentOrderCommand { CarId = 1 });
 
@@ -80,19 +110,14 @@ public class RentOrdersServiceTests
     [Fact]
     public async Task CheckRentOrderAsync_WhenOrderExists_ReturnsResponse()
     {
-        var order = new RentOrderModel
-        {
-            Id = 1, CarId = 5, Processed = true, CreatedAt = DateTime.UtcNow
-        };
+        var order = CreateOrder(id: 1, carId: 5, processed: true);
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 
         var result = await _sut.CheckRentOrderAsync(new GetRentOrderByIdQuery { Id = 1 });
 
         result.Should().NotBeNull();
-        result!.Order.Id.Should().Be(1);
-        result.Order.CarId.Should().Be(5);
-        result.Order.Processed.Should().BeTrue();
+        result!.Order.Should().BeSameAs(order);
     }
 
     [Fact]
@@ -109,7 +134,7 @@ public class RentOrdersServiceTests
     [Fact]
     public async Task ProcessRentOrderAsync_WhenOrderExists_SetsProcessed()
     {
-        var order = new RentOrderModel { Id = 1, CarId = 5, Processed = false };
+        var order = CreateOrder(id: 1, carId: 5);
         _orderRepositoryMock.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(order);
 

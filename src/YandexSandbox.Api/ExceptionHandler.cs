@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using YandexSandbox.Api.Mapping;
@@ -34,7 +33,7 @@ public static class ExceptionHandler
 
             context.Response.StatusCode = problem.Status!.Value;
             context.Response.ContentType = "application/problem+json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(problem));
+            await context.Response.WriteAsJsonAsync(problem, context.RequestAborted);
         }));
     }
 }
