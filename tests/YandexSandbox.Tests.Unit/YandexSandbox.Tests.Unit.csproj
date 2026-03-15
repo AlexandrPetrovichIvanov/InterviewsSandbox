@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\YandexSandbox.Bll\YandexSandbox.Bll.csproj" />
+    <ProjectReference Include="..\..\src\YandexSandbox.Api\YandexSandbox.Api.csproj" />
   </ItemGroup>
 
 </Project>
