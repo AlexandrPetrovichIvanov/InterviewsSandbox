@@ -8,18 +8,18 @@ namespace YandexSandbox.Api.Controllers;
 [Route("api/[controller]")]
 public class SystemController : ControllerBase
 {
-    private readonly IRentOrderProcessedMessageHandler _handler;
+    private readonly IRentOrderApprovedMessageHandler _handler;
     private readonly IWebHostEnvironment _env;
 
-    public SystemController(IRentOrderProcessedMessageHandler handler, IWebHostEnvironment env)
+    public SystemController(IRentOrderApprovedMessageHandler handler, IWebHostEnvironment env)
     {
         _handler = handler;
         _env = env;
     }
 
-    [HttpPost("produce-rent-order-processed")]
-    public async Task<IActionResult> ProduceRentOrderProcessedMessage(
-        [FromBody] RentOrderProcessedMessage message,
+    [HttpPost("produce-rent-order-approved")]
+    public async Task<IActionResult> ProduceRentOrderApprovedMessage(
+        [FromBody] RentOrderApprovedMessage message,
         CancellationToken cancellationToken)
     {
         if (!_env.IsDevelopment())

@@ -59,7 +59,7 @@ public class RentOrdersService : IRentOrdersService
         return order is null ? null : new GetRentOrderByIdQueryResponse { Order = order };
     }
 
-    public async Task<ProcessRentOrderCommandResponse> ProcessRentOrderAsync(ProcessRentOrderCommand command, CancellationToken cancellationToken = default)
+    public async Task<ApproveRentOrderCommandResponse> ApproveRentOrderAsync(ApproveRentOrderCommand command, CancellationToken cancellationToken = default)
     {
         await using var _ = await _lock.AcquireAsync($"rent-order-{command.OrderId}", cancellationToken);
 
@@ -71,11 +71,11 @@ public class RentOrdersService : IRentOrdersService
         {
             Id = order.Id,
             CarId = order.CarId,
-            Processed = true,
+            Approved = true,
             CreatedAt = order.CreatedAt
         };
         await _orderRepository.UpdateAsync(updated, cancellationToken);
 
-        return new ProcessRentOrderCommandResponse { Order = updated };
+        return new ApproveRentOrderCommandResponse { Order = updated };
     }
 }

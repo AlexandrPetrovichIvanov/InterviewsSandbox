@@ -13,7 +13,7 @@ namespace YandexSandbox.Tests.Integration.Rent;
 public class RentE2eTests
 {
     [Fact]
-    public async Task FullRentOrderFlow_PlaceOrder_ConsumeMessage_OrderIsProcessed()
+    public async Task FullRentOrderFlow_PlaceOrder_ApproveOrder_OrderIsApproved()
     {
         var factory = new WebApplicationFactory<Program>();
         var client = factory.CreateClient();
@@ -29,20 +29,20 @@ public class RentE2eTests
             new PlaceRentOrderApiRequest { CarId = car!.Id });
         orderResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await orderResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>();
-        order!.Processed.Should().BeFalse();
+        order!.Approved.Should().BeFalse();
 
         using (var scope = factory.Services.CreateScope())
         {
-            var handler = scope.ServiceProvider.GetRequiredService<IRentOrderProcessedMessageHandler>();
-            await handler.HandleAsync(new RentOrderProcessedMessage
+            var handler = scope.ServiceProvider.GetRequiredService<IRentOrderApprovedMessageHandler>();
+            await handler.HandleAsync(new RentOrderApprovedMessage
             {
                 OrderId = order.Id,
-                ProcessedAt = DateTime.UtcNow
+                ApprovedAt = DateTime.UtcNow
             });
         }
 
         var checkResponse = await client.GetAsync($"/api/rentorders/{order.Id}");
-        var processedOrder = await checkResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>();
-        processedOrder!.Processed.Should().BeTrue();
+        var approvedOrder = await checkResponse.Content.ReadFromJsonAsync<RentOrderApiResponse>();
+        approvedOrder!.Approved.Should().BeTrue();
     }
 }
