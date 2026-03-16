@@ -5,19 +5,19 @@ using YandexSandbox.Bll.Interfaces.Services;
 
 namespace YandexSandbox.Bll.Handlers;
 
-public class RentOrderProcessedMessageHandler : IRentOrderProcessedMessageHandler
+public class RentOrderApprovedMessageHandler : IRentOrderApprovedMessageHandler
 {
     private readonly IRentOrdersService _rentOrdersService;
 
-    public RentOrderProcessedMessageHandler(IRentOrdersService rentOrdersService)
+    public RentOrderApprovedMessageHandler(IRentOrdersService rentOrdersService)
     {
         _rentOrdersService = rentOrdersService;
     }
 
-    public async Task HandleAsync(RentOrderProcessedMessage message, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(RentOrderApprovedMessage message, CancellationToken cancellationToken = default)
     {
-        await _rentOrdersService.ProcessRentOrderAsync(
-            new ProcessRentOrderCommand { OrderId = message.OrderId },
+        await _rentOrdersService.ApproveRentOrderAsync(
+            new ApproveRentOrderCommand { OrderId = message.OrderId },
             cancellationToken);
     }
 }

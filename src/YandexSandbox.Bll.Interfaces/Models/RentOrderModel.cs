@@ -4,6 +4,7 @@ public class RentOrderModel
 {
     public int Id { get; set; }
     public int CarId { get; set; }
-    public bool Processed { get; set; }
+    public bool Approved { get; set; }
+    public bool Completed { get; set; }
     public DateTime CreatedAt { get; set; }
 }

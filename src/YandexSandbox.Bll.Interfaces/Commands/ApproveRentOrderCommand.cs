@@ -1,6 +1,6 @@
 namespace YandexSandbox.Bll.Interfaces.Commands;
 
-public class ProcessRentOrderCommand
+public class ApproveRentOrderCommand
 {
     public int OrderId { get; set; }
 }

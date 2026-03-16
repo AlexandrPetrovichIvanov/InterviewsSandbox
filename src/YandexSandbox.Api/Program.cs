@@ -34,7 +34,7 @@ builder.Services.AddSingleton<IRentOrderRepository, InMemoryRentOrderRepository>
 builder.Services.AddSingleton<ILock, InMemoryLock>();
 builder.Services.AddScoped<ICarsService, CarsService>();
 builder.Services.AddScoped<IRentOrdersService, RentOrdersService>();
-builder.Services.AddScoped<IRentOrderProcessedMessageHandler, RentOrderProcessedMessageHandler>();
+builder.Services.AddScoped<IRentOrderApprovedMessageHandler, RentOrderApprovedMessageHandler>();
 
 builder.Services.AddSingleton<InMemoryOutboxStorage>();
 builder.Services.AddScoped<IMessageProducer<CarCreatedMessage>, OutboxMessageProducerAdapter<CarCreatedMessage>>();

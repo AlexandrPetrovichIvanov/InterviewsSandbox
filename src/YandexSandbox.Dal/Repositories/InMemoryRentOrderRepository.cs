@@ -17,7 +17,7 @@ public class InMemoryRentOrderRepository : IRentOrderRepository
 
     public Task<RentOrderModel?> GetActiveByCarIdAsync(int carId, CancellationToken cancellationToken = default)
     {
-        var order = _orders.Values.FirstOrDefault(o => o.CarId == carId && !o.Processed);
+        var order = _orders.Values.FirstOrDefault(o => o.CarId == carId && !o.Completed);
         return Task.FromResult(order);
     }
 
@@ -27,7 +27,8 @@ public class InMemoryRentOrderRepository : IRentOrderRepository
         {
             Id = Interlocked.Increment(ref _nextId),
             CarId = order.CarId,
-            Processed = order.Processed,
+            Approved = order.Approved,
+            Completed = order.Completed,
             CreatedAt = DateTime.UtcNow
         };
         _orders[created.Id] = created;
